@@ -19,16 +19,27 @@ Invoke `/skill-creator:skill-creator` for the full skill creation workflow (inte
 
 ## Convention 1: Save Location
 
-All skills live in:
+The repo has two skill directories:
+
+- **`skills/`** — Skills created by the user (pipeline, utilities, custom workflows)
+- **`plugins/`** — Skills from external plugins (e.g., impeccable design ecosystem)
+
+New user-created skills go in:
 
 ```
 ~/Desktop/Projects/agent-skills/skills/<skill-name>/SKILL.md
 ```
 
-The `<skill-name>` directory should be lowercase, hyphenated (e.g., `create-skill`, `msf`, `verify`). Check the existing skills first to avoid name collisions:
+The `<skill-name>` directory should be lowercase, hyphenated (e.g., `create-skill`, `msf`, `verify`). Check both directories for name collisions:
 
 ```bash
-ls ~/Desktop/Projects/agent-skills/skills/
+ls ~/Desktop/Projects/agent-skills/skills/ ~/Desktop/Projects/agent-skills/plugins/
+```
+
+After creating a new skill, run the link script to update symlinks in all config directories:
+
+```bash
+~/Desktop/Projects/agent-skills/link-skills.sh
 ```
 
 ---
@@ -104,7 +115,8 @@ argument-hint: "<what to pass>"
 
 Before writing the final SKILL.md, verify:
 
-- [ ] Saved to `~/Desktop/Projects/agent-skills/skills/<name>/SKILL.md`
+- [ ] Saved to `~/Desktop/Projects/agent-skills/skills/<name>/SKILL.md` (NOT `plugins/`)
+- [ ] Ran `~/Desktop/Projects/agent-skills/link-skills.sh` to update symlinks
 - [ ] Platform Adaptation section present
 - [ ] Description includes natural trigger phrases
 - [ ] No hard dependency on `superpowers:` skills (inline fallback exists)

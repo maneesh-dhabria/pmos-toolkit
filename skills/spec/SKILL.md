@@ -416,8 +416,11 @@ CREATE TABLE ... (
 
 **Tier 2-3:** Run minimum 2 loops, continue until exit criteria are met.
 
-### Review Checklist (run every loop)
+### Two Types of Review
 
+Each loop runs BOTH checks:
+
+**A. Structural Checklist** (catches missing/incomplete sections):
 1. Every requirement from the requirements doc mapped to a spec section?
 2. API contracts have request + response + error shapes?
 3. DB schema is actual SQL, not prose?
@@ -426,15 +429,23 @@ CREATE TABLE ... (
 6. Testing strategy has exact verification commands?
 7. Verification plan is concrete enough to execute?
 
+**B. Design-Level Self-Critique** (catches wrong/shallow decisions):
+1. Re-read each Decision Log entry — are there decisions you made implicitly that aren't logged? Any decision where you picked the obvious choice without considering alternatives?
+2. Would a different engineer reading this spec ask "but what about X?" — identify the Xs.
+3. Are there areas where the spec says WHAT but not HOW (or vice versa)? The spec should be prescriptive about interfaces and flexible about internals.
+4. Are there cross-cutting concerns (theming, error handling, loading states, auth) that are mentioned once but affect many components?
+
+The structural checklist catches omissions. The design critique catches shallow thinking. Both are needed — a spec can be structurally complete but architecturally weak.
+
 ### Loop Protocol
 
-1. Run the checklist above
+1. Run BOTH checklists above
 2. Log findings in the Review Log table:
    ```
    | Loop | Findings | Changes Made |
    |------|----------|-------------|
    ```
-3. Share findings concisely with the user
+3. **Present findings to the user BEFORE making changes** — share what you found, what you plan to fix, and ask if the user sees additional gaps. Do NOT silently self-fix and move on. The review loop is a collaborative checkpoint, not a self-assessment.
 4. Use AskUserQuestion if findings need user input
 5. Fix issues inline — do NOT create a new file
 6. Commit: `git commit -m "docs: spec review loop N for <feature>"`
@@ -448,6 +459,7 @@ CREATE TABLE ... (
 - Testing strategy has exact verification commands
 - No open clarifications from user
 - Last loop found only cosmetic issues
+- **User has confirmed they have no further concerns** (do not self-declare exit)
 
 ---
 
@@ -461,7 +473,7 @@ Run one final improvement pass:
 4. **Coherence** — Any conflicting specifications?
 5. **Engineer readability** — Can a different engineer fully understand what to build, how to build it, and how to verify it?
 
-**Share your analysis with the user BEFORE modifying anything.** Ask for confirmation on what needs to be fixed.
+**Share your analysis with the user BEFORE modifying anything.** Ask for confirmation on what needs to be fixed. Do NOT declare the spec complete until the user confirms.
 
 After final fixes, commit:
 ```
@@ -469,7 +481,7 @@ git add docs/specs/<file>
 git commit -m "docs: add spec for <feature>"
 ```
 
-Tell the user: "Spec complete. When ready, run `/plan` to create the execution plan."
+Ask the user: "I believe the spec is ready. Do you have any remaining concerns, or shall we move to `/plan`?" — the user's confirmation is required before declaring completion.
 
 ---
 

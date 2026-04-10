@@ -430,7 +430,7 @@ Each loop runs BOTH checks:
 7. Verification plan is concrete enough to execute?
 
 **B. Design-Level Self-Critique** (catches wrong/shallow decisions):
-1. Re-read each Decision Log entry — are there decisions you made implicitly that aren't logged? Any decision where you picked the obvious choice without considering alternatives?
+1. **Reviewer perspective:** If you were sent this document for review, what comments would you add? Read it as a critical reviewer, not the author — flag implicit decisions not in the Decision Log, vague interface contracts, missing error paths, and architectural assumptions that aren't justified.
 2. Would a different engineer reading this spec ask "but what about X?" — identify the Xs.
 3. Are there areas where the spec says WHAT but not HOW (or vice versa)? The spec should be prescriptive about interfaces and flexible about internals.
 4. Are there cross-cutting concerns (theming, error handling, loading states, auth) that are mentioned once but affect many components?

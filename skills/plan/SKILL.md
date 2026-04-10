@@ -280,9 +280,9 @@ Each loop runs BOTH checks:
 8. Final verification task is concrete and complete?
 
 **B. Design-Level Self-Critique** (catches wrong/shallow task decomposition):
-1. Are there tasks that are too large (>1 hour of focused work) and should be split? Are there tasks that are trivially small and should be merged?
-2. Are there implicit dependencies between tasks that aren't reflected in the ordering? Would an engineer hit a blocker mid-task because a prerequisite wasn't completed?
-3. Are there decisions embedded in task descriptions that should be in the Decision Log instead?
+1. **Reviewer perspective:** If you were sent this plan for review, what comments would you add? Read it as a critical reviewer, not the author — flag tasks with unclear scope, missing verification steps, implicit dependencies, and assumptions about what's "obvious."
+2. Are there tasks that are too large (>1 hour of focused work) and should be split? Are there tasks that are trivially small and should be merged?
+3. Are there implicit dependencies between tasks that aren't reflected in the ordering? Would an engineer hit a blocker mid-task because a prerequisite wasn't completed?
 4. Does the task ordering minimize context-switching? Are related changes grouped together?
 
 ### Loop Protocol

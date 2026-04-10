@@ -335,8 +335,8 @@ Each loop runs BOTH checks:
 6. New-person readability test — can someone unfamiliar understand what we're building?
 
 **B. Product-Level Self-Critique** (catches shallow/incomplete thinking):
-1. For each user journey — is there a moment where the user would feel confused, stuck, or unsure what to do next? Are there gaps between steps that assume the user "just knows"?
-2. Are there unstated assumptions about the user's environment, knowledge, or workflow that should be made explicit?
+1. **Reviewer perspective:** If you were sent this document for review, what comments would you add? Read it as a critical reviewer, not the author — flag vague language, missing rationale, unstated assumptions, and gaps between steps.
+2. For each user journey — is there a moment where the user would feel confused, stuck, or unsure what to do next? Are there gaps between steps that assume the user "just knows"?
 3. Are there competing priorities or tensions in the requirements that haven't been acknowledged? (e.g., "simple onboarding" vs. "highly configurable" — which wins when they conflict?)
 4. Would a skeptical stakeholder ask "why not just do X instead?" — are those alternatives addressed?
 

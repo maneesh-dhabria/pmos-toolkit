@@ -241,12 +241,36 @@ Before defining tasks, map out which files will be created or modified and what 
 - "Add appropriate error handling" / "handle edge cases"
 - "Write tests for the above" (without actual test code)
 - "Similar to Task N" (repeat it — tasks may be read independently)
+- Tests that only verify existence or status codes without asserting on actual data and behavior
 
 **Exact file paths** in every task. **Exact commands** with expected output in every verification step.
 
 **Incremental verification:** Every task has an "Inline verification" section. Do not batch all testing to the end.
 
 **Prescribe the interface, leave the implementation:** Specify function names, signatures, test assertions, file paths, and commands. Leave internal algorithm details and refactoring decisions to the implementor.
+
+### Verification Must Prove Behavior
+
+Every task's verification must answer: **"If the implementation had a subtle bug, would this catch it?"** If not, the verification is structural (proves existence) not behavioral (proves correctness) — and that's a plan failure.
+
+**The litmus test:** Could the implementation be wrong in a plausible way and still pass this verification? If yes, the verification is insufficient — add behavioral tests until every plausible failure mode is covered. The goal is not "at least one behavioral test" — it is **enough behavioral tests to prove the feature works end-to-end**.
+
+A good task verification has two parts:
+1. **Automated tests** — assert on behavior with realistic data, not just status codes or "it compiles." Write as many as needed to cover the task's functionality: happy paths, edge cases, relationship loading, data integrity.
+2. **Proof-of-life check** — exercises the feature end-to-end (curl, CLI run, manual browser check) with exact expected output
+
+**Common structural-only verifications to avoid (plan failures):**
+
+| Task type | Structural (proves existence only) | Behavioral (proves correctness) |
+|-----------|-------------------------------|--------------------------------|
+| API endpoint | `assert status == 200` on empty DB | Seed/use real data, assert response body has correct fields, relationships populated, enums as strings |
+| DB migration | `alembic upgrade head` succeeds | Query tables, verify constraints reject bad data, verify seed data values (not just counts) |
+| Frontend component | `npm run build` passes | Mount with realistic props and assert rendered output; or explicit manual step: "navigate to /path, verify X renders, click Y, verify Z" |
+| Infrastructure | `docker compose config` parses | Start service, verify it connects to dependencies, verify port binding with actual request |
+| CLI command | `--help` exits 0 | Run with real inputs, assert on output content |
+| Config/schema | Import doesn't error | Instantiate with realistic values, assert fields, verify integration with consuming code |
+
+When writing a task's test step, check: does the test use realistic data and assert on the actual output shape and content? A test that passes against an empty database or with no assertions on the response body is not a behavioral test.
 
 ### Decision Log Rules
 
@@ -278,6 +302,7 @@ Each loop runs BOTH checks:
 6. No placeholder language anywhere?
 7. **Type consistency:** Do types, method signatures, and property names used in later tasks match what was defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a plan bug.
 8. Final verification task is concrete and complete?
+9. **Verification quality:** Does every task's test assert on behavioral output with realistic data — not just status codes, exit codes, or "it compiles"? Apply the litmus test: could a subtly broken implementation still pass this verification?
 
 **B. Design-Level Self-Critique** (catches wrong/shallow task decomposition):
 1. **Reviewer perspective:** If you were sent this plan for review, what comments would you add? Read it as a critical reviewer, not the author — flag tasks with unclear scope, missing verification steps, implicit dependencies, and assumptions about what's "obvious."
@@ -351,6 +376,7 @@ Then offer execution choice:
 - Do NOT write verification steps without exact commands and expected output
 - Do NOT claim the plan is complete without sharing review findings with the user
 - Do NOT batch all testing into the final task — each task must have inline verification
+- Do NOT write tests that only check error paths (404, empty results) — every task needs enough behavioral tests with realistic data to prove its functionality works, not just that routes exist
 - Do NOT specify exact implementation code line-by-line — prescribe interfaces and test shapes, leave internals to judgment
 - Do NOT combine unrelated changes into a single task — each task should be independently committable
 - Do NOT forget the "Done when" one-liner — it defines what success looks like for the whole plan

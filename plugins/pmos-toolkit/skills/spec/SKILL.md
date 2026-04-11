@@ -96,6 +96,18 @@ Run roles in this order. Each role's decisions inform the next — architecture 
 
 **Why this order:** Architect establishes the system shape (containers, protocols, service boundaries). DBA designs the schema within those boundaries. Designer builds the frontend knowing what data and APIs exist. Product Director validates that the technical decisions serve user flows. DevOps wraps deployment around the full picture. Analyst does a final coverage check.
 
+### Data Flow Trace (conditional)
+
+**When the feature involves a write→read pipeline** (search indexing, background processing, sync, export, import, caching, aggregation — anything where data written in one flow is consumed in another), the Architect role must produce a data flow trace:
+
+1. Name the **write entry point** (e.g., `add_book()`)
+2. Name the **storage target** (e.g., `search_index` table, cache key, queue)
+3. Name the **read entry point** (e.g., `SearchService.search()`)
+4. **Verify each link exists** in the current codebase with a grep or file read — not assumption
+5. If any link is missing, flag it as a **gap to implement** in the spec
+
+**Trigger heuristic:** if the feature mentions search, index, sync, export, import, process, queue, cache, or aggregate — run the trace. Skip for purely CRUD or purely UI features.
+
 **When to adjust:** If the project is primarily a frontend/UX change with minimal backend work, move Designer to position 2 (before DBA) — the UX may drive what data needs to be stored. State your reordering rationale when you announce the first role.
 
 For Tier 2 (2-3 roles), pick from this list in order — don't jump to role 5 while skipping role 2.

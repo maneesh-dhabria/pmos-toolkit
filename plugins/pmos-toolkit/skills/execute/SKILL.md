@@ -36,7 +36,11 @@ These instructions use Claude Code tool names. In other environments:
    - **Fallback:** `git checkout -b feature/<name>` if worktrees aren't practical.
    - **Setup:** Auto-detect and install dependencies (`npm install`, `pip install -r requirements.txt`, `cargo build`, etc.). Run the test suite to establish a clean baseline before starting work.
 4. **Check for environment conflicts.** If using Docker with parallel stacks, ensure ports and project names don't collide.
-5. **Create task list.** Extract every task from the plan and create a tracked task for each, using your available task tracking tool. Include:
+5. **Verify verification tooling.** Before starting Task 1, confirm that every verification tool the plan requires is responsive:
+   - If the plan has backend API tasks: confirm the dev server starts and responds to a basic request.
+   - If the plan has frontend tasks: confirm browser automation (Playwright MCP) is responsive. If it fails, establish the fallback now (build check, type check, curl against dev server) — do NOT proceed assuming it will work later.
+   - If any tool is unavailable, log it and document the alternative before starting.
+6. **Create task list.** Extract every task from the plan and create a tracked task for each, using your available task tracking tool. Include:
    - Task name and number from the plan
    - Key files to be modified
    - Dependencies on other tasks (if any)
@@ -105,7 +109,9 @@ Execute tasks in order. After each task, self-review against the spec before pro
 ### Execution Rules
 
 - **Test in smaller chunks.** Verify after each task. Do NOT batch all testing to the end.
+- **Runtime verification for API tasks.** For tasks that modify API endpoints or middleware, inline verification MUST include a runtime check (`curl` or equivalent against a running dev server) — not just passing tests. Tests verify code correctness; runtime checks verify DI wiring, middleware, serialization, and actual DB state.
 - **Update documentation** as part of relevant tasks (CLAUDE.md, changelogs, etc.).
+- **Log plan deviations.** When the actual codebase differs from what the plan assumes (e.g., model fields don't exist, method signatures differ, enum values are different), log it inline: `DEVIATION: Plan assumes X, actual codebase has Y`. Adapt the implementation to reality but do NOT silently adjust — the deviation log helps catch plan quality issues for future sessions.
 
 ---
 
@@ -127,13 +133,13 @@ Run every applicable item. Do NOT skip verification steps. Do NOT rely solely on
   ```
   Ensure port offsets don't collide with other running stacks.
 - [ ] **API verification:** Use `curl` or CLI commands to verify every new/modified endpoint returns the expected payload shape as defined in the spec.
-- [ ] **Frontend verification (Playwright MCP):**
-  1. Authenticate first (if auth is enabled)
-  2. Navigate to each affected page
-  3. Walk through every user journey from the spec
-  4. Verify UI elements render correctly
-  5. Check for console warnings/errors
-  6. Take screenshots for documentation
+- [ ] **Frontend verification** (fallback ladder — use the first level that works):
+  1. **Playwright MCP** (preferred): authenticate, navigate to each affected page, walk through every user journey from the spec, check for console errors, take screenshots.
+  2. **If Playwright fails**: attempt recovery once (clear cache, new tab). If still dead, move to level 3.
+  3. **Programmatic fallback**: `curl` the dev server routes (expect 200), verify the JS bundle contains expected component imports (`curl <bundle-url> | grep`), run type checks (`vue-tsc`, `tsc --noEmit`) and build (`npm run build`).
+  4. **Suggest tooling fix**: propose concrete commands to restore browser testing. Do NOT ask the user to manually test features — that defeats the purpose of automated verification.
+
+  Never skip frontend verification entirely. Never fall back to "please check manually."
 - [ ] **Manual spot check:** Run actual scenarios in the development environment. Verify functionality by interacting with the system as a user would. Do NOT only rely on automated tests.
 - [ ] **Seed data:** Re-seed if data files changed: `python scripts/seed_sop_db.py --reset`
 

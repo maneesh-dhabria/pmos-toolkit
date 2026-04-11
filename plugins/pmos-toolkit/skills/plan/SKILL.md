@@ -53,7 +53,8 @@ Study the existing code that will be impacted. This is NOT a skim — you must r
    - Integration points with other modules
 3. **Read adjacent code.** Check imports, callers, and consumers of the code you'll modify.
 4. **Check project conventions.** Read `CLAUDE.md`, `.claude/rules/`, and recent commits for patterns to follow.
-5. **Summarize findings** in a "Code Study Notes" section for the plan.
+5. **Trace data flow pipelines.** If the feature involves a write→read pipeline (search indexing, sync, export, import, queue, cache, aggregation), verify the full chain exists: write entry point → storage target → read entry point. Grep for each link. If any link is missing, add a task to implement it. (Skip for purely CRUD or purely UI features.)
+6. **Summarize findings** in a "Code Study Notes" section for the plan.
 
 **Gate:** You must have read every impacted file before writing a single line of the plan.
 

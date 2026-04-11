@@ -50,13 +50,12 @@ Every skill MUST include this section after the "Announce at start" line:
 These instructions use Claude Code tool names. In other environments:
 - **No `AskUserQuestion`:** State your assumption, document it in the output, and proceed. The user reviews after completion.
 - **No subagents:** Perform research and analysis sequentially as a single agent.
-- **No `superpowers:` skills:** Follow the inline instructions in this skill directly.
 - **No Playwright MCP:** Note browser-based verification as a manual step for the user.
 ```
 
 Additionally, when writing skill instructions:
 - Do NOT make `AskUserQuestion` the only way to get user input — always provide a "proceed with stated assumptions" fallback
-- Do NOT delegate core logic entirely to `superpowers:` skills — include enough inline instructions that the skill works standalone
+- Do NOT delegate core logic to external plugins — include enough inline instructions that the skill works standalone
 - Do NOT assume MCP tools are available — treat them as optional enhancements
 - Do NOT assume subagent dispatch — write instructions that work sequentially too
 
@@ -115,7 +114,7 @@ Before writing the final SKILL.md, verify:
 - [ ] Restarted session or ran `/reload-plugins` to pick up the new skill
 - [ ] Platform Adaptation section present
 - [ ] Description includes natural trigger phrases
-- [ ] No hard dependency on `superpowers:` skills (inline fallback exists)
+- [ ] No hard dependency on external plugins (fully self-contained)
 - [ ] No hard dependency on `AskUserQuestion` (assumption fallback exists)
 - [ ] No hard dependency on MCP tools (noted as manual step if unavailable)
 - [ ] Pipeline diagram included if the skill fits the pipeline

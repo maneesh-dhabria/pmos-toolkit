@@ -9,7 +9,7 @@ argument-hint: "<path-to-plan-doc>"
 
 Execute an implementation plan end-to-end with strict verification. Supports git worktree isolation when available, but works without it.
 
-If `superpowers:subagent-driven-development` or `superpowers:executing-plans` are available, use them. Otherwise, follow the inline instructions below — they are self-contained.
+Follow the inline instructions below — they are self-contained.
 
 **Announce at start:** "Using the execute skill to implement the plan in an isolated worktree."
 
@@ -18,7 +18,6 @@ If `superpowers:subagent-driven-development` or `superpowers:executing-plans` ar
 These instructions use Claude Code tool names. In other environments:
 - **No `AskUserQuestion`:** State your assumption, document it in the output, and proceed. The user reviews after completion.
 - **No subagents:** Perform research and analysis sequentially as a single agent.
-- **No `superpowers:` skills:** Follow the inline instructions in this skill directly.
 - **No Playwright MCP:** Note browser-based verification as a manual step for the user.
 
 ---
@@ -28,7 +27,7 @@ These instructions use Claude Code tool names. In other environments:
 1. **Locate the plan.** If the user passed an argument, use it. Otherwise check `docs/plans/` for the most recent file. If nothing found, ask.
 2. **Read the plan and its upstream spec end-to-end.** Understand the "Done when" criteria and final verification task.
 3. **Isolate the work (if possible):**
-   - If `superpowers:using-git-worktrees` is available: create an isolated worktree.
+   - If git worktrees are supported: create an isolated worktree (`git worktree add`).
    - Otherwise: create a feature branch (`git checkout -b feature/<name>`).
 4. **Check for environment conflicts.** If using Docker with parallel stacks, ensure ports and project names don't collide.
 
@@ -44,7 +43,7 @@ Work through the plan's tasks in order. For each task:
 4. **Commit** — small, focused commit per task. Not one giant commit at the end.
 5. **Move to next task** — do not proceed if verification fails.
 
-If subagents are available (e.g., `superpowers:subagent-driven-development`), dispatch independent tasks in parallel. Otherwise, execute sequentially.
+If subagents are available (Agent tool), dispatch independent tasks in parallel. Otherwise, execute sequentially.
 
 ### Execution Rules
 

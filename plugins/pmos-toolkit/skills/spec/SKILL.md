@@ -23,7 +23,6 @@ A spec is prescriptive about WHAT and WHY, but leaves room for engineering judgm
 These instructions use Claude Code tool names. In other environments:
 - **No `AskUserQuestion`:** State your assumption, document it in the output, and proceed. The user reviews after completion.
 - **No subagents:** Perform research and analysis sequentially as a single agent.
-- **No `superpowers:` skills:** Follow the inline instructions in this skill directly.
 - **No Playwright MCP:** Note browser-based verification as a manual step for the user.
 
 ---

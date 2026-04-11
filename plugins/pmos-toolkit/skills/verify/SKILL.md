@@ -9,7 +9,7 @@ argument-hint: "<path-to-spec-doc> (optional — will search docs/specs/ if omit
 
 Systematically verify that an implementation matches its spec, requirements, and plan. This is a **standalone verification gate** — run it anytime after implementation is done, regardless of how the code was written.
 
-Not a behavioral rule (that's `superpowers:verification-before-completion`). This is an **operational workflow** — a structured sequence of verification steps with evidence collection.
+This is an **operational workflow** — a structured sequence of verification steps with evidence collection.
 
 **Announce at start:** "Using the verify skill to run post-implementation verification."
 
@@ -18,7 +18,6 @@ Not a behavioral rule (that's `superpowers:verification-before-completion`). Thi
 These instructions use Claude Code tool names. In other environments:
 - **No `AskUserQuestion`:** State your assumption, document it in the output, and proceed. The user reviews after completion.
 - **No subagents:** Perform research and analysis sequentially as a single agent.
-- **No `superpowers:` skills:** Follow the inline instructions in this skill directly.
 - **No Playwright MCP:** Note browser-based verification as a manual step for the user.
 
 ---
@@ -281,7 +280,7 @@ One last check before committing:
 
 ## Evidence Standards
 
-Every claim must have evidence. Apply `superpowers:verification-before-completion` discipline:
+Every claim must have evidence. No exceptions:
 
 | Claim | Required Evidence |
 |-------|------------------|

@@ -23,7 +23,6 @@ The plan translates a spec into **bite-sized, TDD-driven tasks** with exact file
 These instructions use Claude Code tool names. In other environments:
 - **No `AskUserQuestion`:** State your assumption, document it in the output, and proceed. The user reviews after completion.
 - **No subagents:** Perform research and analysis sequentially as a single agent.
-- **No `superpowers:` skills:** Follow the inline instructions in this skill directly.
 - **No Playwright MCP:** Note browser-based verification as a manual step for the user.
 
 ---
@@ -359,9 +358,9 @@ Then offer execution choice:
 
 > **"Plan complete and saved. Two execution options:**
 >
-> **1. Subagent-Driven (recommended)** — I dispatch a fresh subagent per task, review between tasks, fast iteration. Uses `superpowers:subagent-driven-development`.
+> **1. Subagent-Driven (recommended)** — I dispatch a fresh subagent per task, review between tasks, fast iteration.
 >
-> **2. Inline Execution** — Execute tasks in this session with checkpoints for review. Uses `superpowers:executing-plans`.
+> **2. Inline Execution** — Execute tasks in this session with checkpoints for review.
 >
 > **Which approach?"**
 

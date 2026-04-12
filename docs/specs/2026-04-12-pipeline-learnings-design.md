@@ -13,7 +13,12 @@ The existing `/session-log` and workstream enrichment capture project-specific c
 
 ## Solution
 
-A shared `learnings-capture.md` instruction file that each pipeline skill references as its final task. It captures global patterns into a single `~/.pmos/learnings.md` file, which every skill reads at startup to inform its approach. The file self-maintains via user-approved summarization when it exceeds 300 lines.
+A shared `learnings-capture.md` instruction file that each pipeline skill references as its final task. Each learning is categorized as **global** (applies across all projects) or **repo-specific** (applies only to the current codebase), and routed accordingly:
+
+- **Global patterns** → `~/.pmos/learnings.md` (read by every skill at startup)
+- **Repo-specific patterns** → `CLAUDE.md` and/or `AGENTS.md` in the current repo (whichever exist; write to both when both exist)
+
+The global file self-maintains via user-approved summarization when it exceeds 300 lines.
 
 ## Design Principles
 
@@ -84,22 +89,20 @@ A shared instruction file referenced by all pipeline skills. Contains both captu
 3. **Reflect** on the current session:
    - What went wrong or was harder than it should have been?
    - What prompting gap or missing instruction caused friction?
-   - What pattern would help future runs of this skill across any project?
-4. **Filter** — only keep learnings that are:
-   - **Global**: Not tied to a specific project, repo, or workstream
+   - What pattern would help future sessions?
+4. **Categorize** each learning as either:
+   - **Global pattern**: Applies across all projects and all runs of this skill → `~/.pmos/learnings.md`
+   - **Repo-specific**: A convention, constraint, or gotcha specific to this codebase → `CLAUDE.md` and/or `AGENTS.md`
+5. **Filter** — only keep learnings that are:
    - **Actionable**: Specific enough to change behavior (not "be more thorough")
-   - **Novel**: Not already captured in substance under this skill's section
-5. **Propose** 0-3 learnings to the user:
-   ```
-   Based on this session, I'd add to Pipeline Learnings:
-
-   ## /spec
-   + Prompt for failure modes explicitly when user only describes happy path
-
-   Add these learnings? (y/n/edit)
-   ```
-6. **If approved**: Append bullets under the `## /skill-name` section (create section if it doesn't exist)
-7. **If declined or nothing to add**: "No new global learnings from this session." Move on.
+   - **Novel**: Not already captured in substance in the target file
+6. **Propose global learnings** (0-3) to the user, user approves or declines
+7. **Propose repo-specific learnings** (0-3) to the user:
+   - Check if `CLAUDE.md` and/or `AGENTS.md` exist in the current repo
+   - If neither exists: skip this step silently (do not offer to create either file)
+   - If at least one exists: propose bullets, user approves or declines
+   - On approval: append bullets at the end of every file that exists (both CLAUDE.md and AGENTS.md if both exist — they're meant to be kept in sync). No dedicated section heading — just flat bullets.
+8. The two proposals (global, repo-specific) are independent — user can approve one and decline the other
 
 ### Summarization process
 

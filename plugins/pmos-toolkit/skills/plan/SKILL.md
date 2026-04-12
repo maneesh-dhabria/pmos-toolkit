@@ -35,7 +35,7 @@ Before any other work, follow the context loading instructions in `product-conte
 
 ## Phase 1: Intake
 
-1. **Locate the spec.** If the user passed an argument, use it. Otherwise check `{docs_path}/specs/` for a recent file. If nothing found, ask.
+1. **Locate the spec.** Follow `../.shared/resolve-input.md` with `phase=specs`, `label="spec"`.
 2. **Read the spec end-to-end.** Summarize it back in 3-5 bullets and confirm understanding with the user via AskUserQuestion.
 3. **Check for an existing plan.** Look in `{docs_path}/plans/` for a file covering this feature.
    - If found: read it, ask if this is an update or fresh start.

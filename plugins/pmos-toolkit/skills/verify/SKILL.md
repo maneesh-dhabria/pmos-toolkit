@@ -54,10 +54,10 @@ Before any other work, follow the context loading instructions in `product-conte
 
 ## Phase 1: Gather Context
 
-1. **Locate upstream documents.** Find the spec, requirements, and plan:
-   - Check user argument first
-   - Then search `{docs_path}/specs/`, `{docs_path}/requirements/`, `{docs_path}/plans/` for the most recent matching files
-   - If nothing found, ask the user
+1. **Locate upstream documents.** Resolve each of the three inputs by following `../.shared/resolve-input.md`:
+   - Spec: `phase=specs`, `label="spec"` (user argument, if passed, applies to the spec)
+   - Requirements: `phase=requirements`, `label="requirements doc"`
+   - Plan: `phase=plans`, `label="plan"`
 2. **Read all three documents** (whichever exist). You need these for the compliance check.
 3. **Identify what changed.** Run `git diff main...HEAD --stat` (or appropriate base) to see which files were modified. This scopes the verification.
 4. **Check if lint/type/tests were already run.** Ask the user or check recent terminal history. Skip steps already completed — but re-run if you're not confident they were clean.

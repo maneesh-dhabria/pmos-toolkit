@@ -33,6 +33,12 @@ Read `~/.pmos/learnings.md` if it exists. Note any entries under `## /creativity
 
 ---
 
+## Locate Requirements
+
+Follow `../.shared/resolve-input.md` with `phase=requirements`, `label="requirements doc"`. Read the resolved file end-to-end before Phase 1.
+
+---
+
 ## Phase 1: Identify & Align on Personas
 
 Propose user personas (minimum 2, maximum 5) and typical usage scenarios (maximum 2 per persona — these are usage contexts, not error cases).

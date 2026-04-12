@@ -35,7 +35,7 @@ Before any other work, follow the context loading instructions in `product-conte
 
 ## Phase 1: Intake & Tier Detection
 
-1. **Locate the requirements.** If the user passed an argument, use it. Otherwise check `{docs_path}/requirements/` for a recent file. If nothing found, ask.
+1. **Locate the requirements.** Follow `../.shared/resolve-input.md` with `phase=requirements`, `label="requirements doc"`.
 2. **Read the requirements end-to-end.** Confirm understanding with the user — summarize the problem, goals, non-goals, and key decisions already made.
 3. **Check for existing spec.** Look in `{docs_path}/specs/` for an existing file.
    - If found: read it, ask the user if this is an update or fresh start.

@@ -25,7 +25,7 @@ These instructions use Claude Code tool names. In other environments:
 
 ## Phase 0: Load Workstream Context
 
-Before any other work, follow the context loading instructions in `context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context passively — it informs implementation decisions and deviation assessments.
+Before any other work, follow the context loading instructions in `product-context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context passively — it informs implementation decisions and deviation assessments.
 
 ---
 
@@ -223,7 +223,7 @@ Every verification claim must have fresh evidence. Run the command, read the out
 
 ## Workstream Enrichment (after commit & report)
 
-If a workstream was loaded in Phase 0, follow the enrichment instructions in `context/context-loading.md` Step 4. For this skill, the signals to look for are:
+If a workstream was loaded in Phase 0, follow the enrichment instructions in `product-context/context-loading.md` Step 4. For this skill, the signals to look for are:
 
 - Key implementation decisions → workstream `## Key Decisions`
 

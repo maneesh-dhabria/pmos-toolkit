@@ -1,6 +1,6 @@
 ---
-name: context
-description: Create and manage persistent workstream context — product, area, or feature scope — that enriches all pipeline skills across repos and sessions. Stores context globally, links per-repo, and progressively enriches through document ingestion and pipeline sessions. Use when the user says "set up context", "initialize context", "update my workstream", "what context do my skills see", "show context", "link this repo", or runs /context init|update|show.
+name: product-context
+description: Create and manage persistent workstream context — product, area, or feature scope — that enriches all pipeline skills across repos and sessions. Stores context globally, links per-repo, and progressively enriches through document ingestion and pipeline sessions. Use when the user says "set up context", "initialize context", "update my workstream", "what context do my skills see", "show context", "link this repo", or runs /product-context init|update|show.
 user-invocable: true
 argument-hint: "init | update [--add-charter 'name'] [docs/URLs] | show"
 ---
@@ -10,7 +10,7 @@ argument-hint: "init | update [--add-charter 'name'] [docs/URLs] | show"
 Create and maintain persistent workstream context that enriches all pipeline skills (`/requirements`, `/spec`, `/plan`, `/execute`, `/verify`) across repos and sessions.
 
 ```
-/context  →  /requirements  →  [/msf, /creativity]  →  /spec  →  /plan  →  /execute  →  /verify
+/product-context  →  /requirements  →  [/msf, /creativity]  →  /spec  →  /plan  →  /execute  →  /verify
 (this skill)                     optional enhancers
 ```
 
@@ -39,11 +39,11 @@ Parse the user's argument to determine which subcommand to run:
 
 ---
 
-## Phase 1: `/context init`
+## Phase 1: `/product-context init`
 
 Creates a new workstream and links the current repo to it.
 
-**Guard:** If `.pmos/settings.yaml` already exists in the current repo, inform the user: "This repo is already linked to workstream '{name}'. Use `/context update` to modify it, or `/context show` to view it." Do not proceed with init.
+**Guard:** If `.pmos/settings.yaml` already exists in the current repo, inform the user: "This repo is already linked to workstream '{name}'. Use `/product-context update` to modify it, or `/product-context show` to view it." Do not proceed with init.
 
 ### Step 1: Auto-Scan the Repo
 
@@ -123,11 +123,11 @@ If no docs: proceed with what we have. Empty sections will fill in over time.
 
 ---
 
-## Phase 2: `/context update`
+## Phase 2: `/product-context update`
 
 Updates an existing workstream.
 
-**Guard:** If no `.pmos/settings.yaml` exists, suggest running `/context init` first.
+**Guard:** If no `.pmos/settings.yaml` exists, suggest running `/product-context init` first.
 
 ### Determine Mode
 
@@ -191,10 +191,10 @@ Apply these updates? (y/n)
 
 ---
 
-## Phase 3: `/context show`
+## Phase 3: `/product-context show`
 
 1. Read `.pmos/settings.yaml` from the current repo
-2. If not found: "No workstream linked to this repo. Run `/context init` to set one up."
+2. If not found: "No workstream linked to this repo. Run `/product-context init` to set one up."
 3. Load `~/.pmos/workstreams/{workstream}.md`
 4. If the workstream type is `charter` or `feature` and has a `product` field, also load the parent workstream and show it under a "Parent context" heading
 5. Display the full workstream content

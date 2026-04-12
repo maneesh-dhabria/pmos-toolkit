@@ -46,13 +46,13 @@ When no `.pmos/settings.yaml` exists:
    Read each workstream file's frontmatter to get the name and type for display.
 
    - **User picks an existing workstream:** Create `.pmos/settings.yaml` with `workstream: {slug}` and `docs_path: .pmos`, then load context per Step 2
-   - **User picks "Create a new workstream":** Run `/context init`, then continue with the pipeline skill
+   - **User picks "Create a new workstream":** Run `/product-context init`, then continue with the pipeline skill
    - **User picks "none" / skips:** Proceed without context, using `docs/` as docs_path
 
 3. **If no workstreams exist** — ask:
    > "No workstream context found. Want to set one up? (This helps pipeline skills produce more relevant output.)"
 
-   - **Yes:** Run `/context init`, then continue
+   - **Yes:** Run `/product-context init`, then continue
    - **No:** Proceed without context, using `docs/` as docs_path
 
 This fallback is a one-time prompt per repo — once `.pmos/settings.yaml` is created, it never triggers again.

@@ -32,7 +32,7 @@ These instructions use Claude Code tool names. In other environments:
 
 ## Phase 0: Load Workstream Context
 
-Before any other work, follow the context loading instructions in `context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context to inform brainstorming — product understanding, user segments, metrics, and constraints make requirements more grounded.
+Before any other work, follow the context loading instructions in `product-context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context to inform brainstorming — product understanding, user segments, metrics, and constraints make requirements more grounded.
 
 ---
 
@@ -406,7 +406,7 @@ Tell the user: "Requirements captured and committed. When ready, run `/spec` to 
 
 ## Workstream Enrichment (after final review)
 
-If a workstream was loaded in Phase 0, follow the enrichment instructions in `context/context-loading.md` Step 4. For this skill, the signals to look for are:
+If a workstream was loaded in Phase 0, follow the enrichment instructions in `product-context/context-loading.md` Step 4. For this skill, the signals to look for are:
 
 - User segments mentioned in the requirements → workstream `## User Segments`
 - Problem statements that refine the product's purpose → workstream `## Value Proposition` or `## Description`

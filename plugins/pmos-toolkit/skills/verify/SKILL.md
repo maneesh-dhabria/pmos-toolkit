@@ -48,7 +48,7 @@ Mark each as in-progress when starting and completed when done. Skip tasks that 
 
 ## Phase 0: Load Workstream Context
 
-Before any other work, follow the context loading instructions in `context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context to verify that implementation aligns with product goals, not just spec compliance.
+Before any other work, follow the context loading instructions in `product-context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context to verify that implementation aligns with product goals, not just spec compliance.
 
 ---
 

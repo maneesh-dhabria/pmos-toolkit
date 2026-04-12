@@ -27,6 +27,12 @@ These instructions use Claude Code tool names. In other environments:
 
 ---
 
+## Load Learnings
+
+Read `~/.pmos/learnings.md` if it exists. Note any entries under `## /creativity` and factor them into your approach for this session.
+
+---
+
 ## Phase 1: Identify & Align on Personas
 
 Propose user personas (minimum 2, maximum 5) and typical usage scenarios (maximum 2 per persona — these are usage contexts, not error cases).
@@ -136,6 +142,12 @@ After any updates, run a final check:
 3. Verify wireframes match updated requirements text (if wireframes were updated)
 
 Report any discrepancies found.
+
+---
+
+## Capture Learnings (after consistency pass)
+
+Follow the learning capture instructions in `learnings/learnings-capture.md` (relative to the skills directory).
 
 ---
 

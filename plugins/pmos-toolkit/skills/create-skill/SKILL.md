@@ -134,6 +134,22 @@ This ensures new skills participate in the global feedback loop from day one.
 
 ---
 
+## Convention 7: Progress Tracking for Multi-Phase Skills
+
+If the skill has **3 or more sequential phases, steps, or user-approval gates**, include a progress-tracking instruction near the top (after Platform Adaptation). Single-shot skills (e.g., `/commit`, `/changelog`) should skip this — the overhead clutters them.
+
+Use platform-neutral phrasing so the instruction works across Claude Code, Codex, and other agents:
+
+```markdown
+## Track Progress
+
+This skill has multiple phases. Create one task per phase using your agent's task-tracking tool (e.g., `TodoWrite` in Claude Code, equivalent in other agents). Mark each task in-progress when you start it and completed as soon as it finishes — do not batch completions.
+```
+
+Rule of thumb: if a user reading the skill would benefit from seeing which phase you're in, add the tracking instruction. Otherwise don't.
+
+---
+
 ## Checklist Before Saving
 
 Before writing the final SKILL.md, verify:
@@ -150,3 +166,4 @@ Before writing the final SKILL.md, verify:
 - [ ] Anti-patterns section present
 - [ ] Learning read at startup (Phase 0 or standalone Load Learnings section)
 - [ ] Capture Learnings section at end (references `learnings/learnings-capture.md`)
+- [ ] Progress tracking instruction included if skill has ≥3 phases/gates

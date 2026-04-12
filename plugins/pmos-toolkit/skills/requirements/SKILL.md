@@ -75,7 +75,7 @@ The user can override the tier. If unsure, ask.
 | Tier | Tasks to create |
 |------|----------------|
 | **Tier 1** | Intake, Write Document, Final Review |
-| **Tier 2** | Intake, Research, Brainstorm, Write Document, Review Loop 1, Review Loop 2, Final Review |
+| **Tier 2** | Intake, Research (Code), Research (Industry), Brainstorm, Write Document, Review Loop 1, Review Loop 2, Final Review |
 | **Tier 3** | Intake, Research (Code), Research (Industry), Brainstorm, Write Document, Review Loop 1, Review Loop 2, Final Review |
 
 Mark each task as in-progress when you start it and completed when done.
@@ -84,7 +84,7 @@ Mark each task as in-progress when you start it and completed when done.
 
 ## Phase 2: Research (Parallel Subagents)
 
-**Skip for Tier 1.** For Tier 2, do 1a only. For Tier 3, do both.
+**Skip for Tier 1.** For Tier 2 and Tier 3, do both 1a and 1b. Tier 3 goes deeper on 1b (more sources, more alternatives).
 
 Dispatch subagents to explore:
 
@@ -94,17 +94,25 @@ Dispatch subagents to explore:
 - Note user flows that already exist and how adjacent features work
 - Identify patterns, conventions, and constraints from the existing system
 
-### 1b. Industry Research (Tier 3 only)
-- Research useful practices, patterns, frameworks, and libraries related to the stated requirements
-- Look for how other products solve similar problems
-- Identify approaches that could be adopted or adapted
-- Collect sources (URLs, library names, framework docs)
+### 1b. Industry Research (Tier 2+)
+
+Goal: avoid inventing in a vacuum. Learn from how others have solved this problem before locking in a direction.
+
+Investigate, with named examples:
+- **Competitor / peer approaches:** How do 2–4 comparable products (Linear, Stripe, Notion, GitHub, Figma, Intercom — whichever are relevant) solve this exact problem? What does their UX flow look like? What did they choose NOT to do?
+- **Alternative solution shapes:** Surface at least 2–3 genuinely different approaches (not variations of one). E.g., modal vs. inline vs. dedicated page; sync vs. async; rules engine vs. ML vs. heuristics. Note tradeoffs of each.
+- **Established patterns / frameworks / libraries:** Known design patterns, OSS libraries, or standards that apply (OAuth flows, CRDTs, command palettes, etc.).
+- **Anti-patterns and failure modes:** What have others gotten wrong here? Post-mortems, deprecated approaches, common complaints.
+
+Depth: Tier 2 → 2–3 competitors, 2 alternatives, brief. Tier 3 → 3–4 competitors, 3+ alternatives, deeper writeup.
+
+Collect sources (URLs, product names, library docs, blog posts) — these go into the Research Sources table.
 
 ### Research Output
 
 Summarize findings before asking questions. Ground the conversation in what already exists and what the industry does. Include:
 - What already exists in the codebase that's relevant
-- What industry patterns/tools could apply (Tier 3)
+- How comparable products solve this, and what alternative approaches exist (Tier 2+)
 - Sources researched (to avoid duplication in future sessions)
 
 ---
@@ -428,7 +436,7 @@ Follow the learning capture instructions in `learnings/learnings-capture.md` (re
 - Do NOT create a new document file in each review loop — update the original
 - Do NOT stop after 1 review loop for Tier 2-3 — minimum is 2
 - Do NOT write decision entries without "Options Considered" and "Rationale" columns
-- Do NOT skip research source tracking (Tier 3) — future sessions need to know what was explored
+- Do NOT skip research source tracking (Tier 2+) — future sessions need to know what was explored
 - Do NOT ask questions for the sake of asking — only ask what genuinely helps shape requirements
 - Do NOT use vague success metrics like "improve user experience" — be specific and measurable
 - Do NOT write non-goals without a "because" reason

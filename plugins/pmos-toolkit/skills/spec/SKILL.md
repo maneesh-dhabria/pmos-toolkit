@@ -66,10 +66,19 @@ Before any other work, follow the context loading instructions in `product-conte
 - Read test patterns used in adjacent features
 - Identify reusable components, utilities, and infrastructure
 
-### 1b. Industry Research (Tier 3 only)
-- Research frameworks, libraries, and design patterns relevant to the technical approach
-- Look for established solutions to the problems being solved
-- Collect recommendations with sources
+### 1b. Industry Research (Tier 2+)
+
+Goal: the technical design should be informed by how comparable systems are actually built, not just by what's already in this repo.
+
+Investigate, with named examples:
+- **How comparable systems implement this:** 2–4 concrete examples (products, OSS projects, engineering blog posts). What architecture do they use? What trade-offs did they document?
+- **Alternative technical approaches:** At least 2–3 materially different design shapes (e.g., queue vs. webhook vs. polling; relational vs. document; server-rendered vs. client-rendered). Capture tradeoffs: complexity, latency, cost, failure modes, operational burden.
+- **Established patterns, frameworks, libraries, standards** that apply — and whether adopting vs. building is the better call here.
+- **Known failure modes / anti-patterns:** scaling cliffs, consistency bugs, migration pain others have hit with these approaches.
+
+Depth: Tier 2 → 2 competitors/references, 2 alternatives, brief. Tier 3 → 3–4 references, 3+ alternatives, deeper writeup with explicit recommendation + rejected-alternatives section.
+
+Collect all sources for the Research Sources table.
 
 Track all sources in a Research Sources table.
 

@@ -371,69 +371,7 @@ Populate the doc from accumulated state:
 
 ### Simulation doc template
 
-```markdown
-# <Feature Name> — Design Simulation
-
-**Date:** YYYY-MM-DD
-**Spec:** `<path-to-spec>`
-**Tier:** 2 | 3
-
----
-
-## 1. Scope
-- **In scope:** [layers covered]
-- **Out of scope:** [layers deferred — with pointers if known]
-- **Companion specs:** [paths]
-- **Downstream consumers anticipated:** [list]
-
-## 2. Scenario Inventory
-
-| # | Scenario | Source | Category |
-|---|----------|--------|----------|
-
-## 3. Scenario Coverage Matrix
-
-| Scenario | Step | Spec Artifact | Status |
-|----------|------|---------------|--------|
-
-## 4. Artifact Fitness Findings
-
-### 4.1 Data & Storage
-### 4.2 Service Interfaces
-### 4.3 Behavior (State / Workflows)
-### 4.4 Interface (UI / CLI / Library — whichever applies)
-### 4.5 Operational (NFRs, Rollout)
-### 4.6 Other Artifacts (if present)
-
-## 5. Interface ↔ Core Cross-Reference
-
-| # | Interaction | Trigger | Endpoint/Function | Req Shape Match | Res Has What Consumer Needs | Error Mapping Defined | Notes |
-
-## 6. Targeted Pseudocode
-
-### 6.1 [Flow Name]
-[Pseudocode block + DB calls + state transitions + error branches + concurrency notes]
-
-## 7. Gap Register
-
-| # | Gap | Exposed By | Severity | Disposition | Notes |
-|---|-----|-----------|----------|-------------|-------|
-
-## 8. Accepted Risks
-Gaps the user explicitly chose not to fix, with rationale.
-
-## 9. Open Questions
-
-| # | Question | Owner | Needed By |
-
-## 10. Spec Patches Applied
-
-| # | Section | Change Summary | Gap # |
-
-## 11. Review Log
-
-| Loop | Findings | Changes Made |
-```
+Read the full template at `reference/simulation-doc-template.md` (relative to this skill directory). It defines all 11 sections: Scope, Scenario Inventory, Coverage Matrix, Artifact Fitness Findings (6 sub-sections), Cross-Reference, Pseudocode, Gap Register, Accepted Risks, Open Questions, Spec Patches Applied, Review Log.
 
 After writing, commit:
 ```
@@ -469,14 +407,36 @@ If user requests another loop, run it. The single-loop default is the floor, not
 
 ## Phase 10: Workstream Enrichment
 
-Stub — to be filled in T7.
+**Skip if no workstream was loaded in Phase 0.** Otherwise, follow the enrichment instructions in `product-context/context-loading.md` Step 4. For this skill, the signals to look for are:
+
+- Recurring gap categories across simulations → workstream `## Constraints & Scars`
+- Tech-stack-specific failure modes encountered → workstream `## Tech Stack`
+- Architectural patterns that resist gaps well → workstream `## Key Decisions`
+
+This phase is mandatory whenever Phase 0 loaded a workstream — do not skip it just because the core deliverable is complete.
+
+---
 
 ## Phase 11: Capture Learnings
 
-Stub — to be filled in T7.
+**This skill is not complete until the learnings-capture process has run.** Read and follow `learnings/learnings-capture.md` (relative to the skills directory) now. Reflect on whether this session surfaced anything worth capturing — surprising behaviors, repeated corrections, non-obvious decisions. Proposing zero learnings is a valid outcome for a smooth session; the gate is that the reflection happens, not that an entry is written.
+
+After learnings capture, offer the next pipeline step:
+
+> "Simulation complete. Run `/pmos-toolkit:plan` to generate the implementation plan, or review the simulation first?"
 
 ---
 
 ## Anti-Patterns (DO NOT)
 
-To be filled in T7.
+- Do NOT run on Tier 1 bug-fix specs — overkill for isolated fixes; skill should refuse and exit
+- Do NOT trace scenarios before the user confirms the scenario list — tracing the wrong list wastes work
+- Do NOT write pseudocode for every flow — max 2-3, only when the 5 algorithmic-complexity triggers apply
+- Do NOT flag out-of-scope layers as gaps — respect the Scope Declaration from Phase 1
+- Do NOT silently update the spec — every patch requires user approval (Apply / Modify / Accept / Defer)
+- Do NOT conflate "not specified" with "wrong" — Scenario Trace finds coverage gaps; Artifact Fitness finds quality gaps; keep them separate in the Gap Register with different prefixes (S / B / W)
+- Do NOT run simulation without reading the spec end-to-end first
+- Do NOT skip Scope Declaration — assuming "full stack" causes false-positive gaps in backend-only or CLI-first specs
+- Do NOT rubber-stamp gaps as "accepted risk" without recording rationale — the simulation doc's value depends on traceable decisions
+- Do NOT batch gap resolution until after Phase 8 — gaps get resolved in Phase 7, before the doc is written
+- Do NOT produce the simulation doc before all gaps have a disposition

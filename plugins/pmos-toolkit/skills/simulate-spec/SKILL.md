@@ -143,15 +143,140 @@ Present the full list as a table:
 
 ## Phase 3: Scenario Trace
 
-Stub — to be filled in T4.
+For each confirmed scenario, decompose into the steps the design must perform end-to-end. For each step, cite the concrete spec artifact that implements it (FR-ID, API endpoint, DB column, sequence diagram, state transition, sequence step). If no artifact exists for a step, flag as **GAP** and append to the Gap Register.
+
+**Coverage matrix format:**
+
+| Scenario | Step | Spec Artifact | Status |
+|----------|------|---------------|--------|
+| S14: Concurrent promo apply | 1. Customer A sends POST /orders/{id}/promo | API §9.3 | ✓ |
+| | 2. Check promo availability | No `promo_usage` table with unique constraint | **GAP** |
+| | 3. Decrement promo counter | Not specified | **GAP** |
+| | 4. Return success | API §9.3 response | ✓ |
+
+**Gap Register:** A running list of all findings from Phases 3-6. Each entry: `{# | Gap | Exposed By | Severity | Disposition}`. Severity is one of:
+- **blocker** — design will not work without this
+- **significant** — design works but produces wrong outcomes in the named scenario
+- **minor** — quality-of-life issue, not blocking
+- **forward-compat** — fine today; needed for declared future consumers
+
+Disposition is filled in Phase 7. The Gap Register persists across Phases 3-6 — every phase appends to it.
+
+**Tip:** When a step has multiple plausible artifacts, cite all of them. Ambiguity itself is a finding worth logging as "minor — multiple valid interpretations."
+
+---
 
 ## Phase 4: Artifact Fitness Critique
 
-Stub — to be filled in T4.
+Walk each spec artifact bucket and ask not "is this present?" but "is this RIGHT for the scenarios?" Findings get appended to the Gap Register with severity labels.
+
+Run the buckets that apply based on the Scope Declaration from Phase 1. Skip buckets explicitly out of scope.
+
+### Bucket 1: Data & Storage
+
+For each table / collection / persistent store in the spec:
+- **Schema shape** — does it have the columns the scenarios need? Right cardinality (single vs. list)?
+- **Relationships** — foreign keys present? Cardinality correct (1:1 vs. 1:N vs. N:N)?
+- **Constraints** — UNIQUE on what should be unique? NOT NULL on what shouldn't be null? CHECK constraints for state machines?
+- **Indexes** — do the actual query patterns from the scenarios have supporting indexes? Composite index column order match query predicates?
+- **Lifecycle columns** — `created_at`, `updated_at`, soft-delete (`deleted_at`), version (`version` for optimistic locking)?
+- **Temporal / audit needs** — do scenarios require historical state? Audit log table?
+- **Idempotency** — `idempotency_key` column on tables that receive retried writes?
+- **Optimistic locking / versioning** — concurrency-sensitive tables have a version column?
+- **Config & feature flags** — runtime configurable values captured? Default values documented?
+
+### Bucket 2: Service Interfaces
+
+For each API endpoint, message, event, webhook, or integration contract:
+- **Request payload completeness** — every field the handler needs is in the request?
+- **Response payload usefulness** — consumer needs (not just "return the entity")? Will consumers need a follow-up call to get related data?
+- **Error responses** — enumerated with shape (not just status codes)? Each plausible failure has a defined error shape?
+- **Pagination, filtering, sorting** — present where collection size warrants?
+- **Idempotency keys** — required on mutating endpoints that are retry-prone?
+- **Versioning strategy** — clear path for backward-compatible evolution?
+- **Events / messages / webhooks** — payload shape stable? Replay-safe? Ordering guarantees stated?
+
+### Bucket 3: Behavior (State / Workflows)
+
+For each state machine, workflow, or multi-step process:
+- **All states present** — including failed, cancelled, terminal/archived? Partial-success states?
+- **Every transition defined** — including reverse transitions (rollback, cancel) and self-loops (retry)?
+- **Dead states** — flagged any state with no way out?
+- **Side effects per transition** — named explicitly (event emitted, notification sent, downstream call triggered)?
+
+### Bucket 4: Interface (adaptive — only one variant runs based on Scope Declaration)
+
+**If UI is in scope:**
+- Component hierarchy — right boundaries, right ownership of state?
+- State placement — URL / store / server / component — sensible?
+- All UI states covered — loading, empty, error, partial-load, stale, auth-expired-mid-flow?
+- First-time vs. returning user, form validation, navigation, deep-linking, back-button behavior?
+- Optimistic updates + rollback behavior on API failure?
+- Accessibility (keyboard nav, screen reader, ARIA), responsive breakpoints?
+
+**If CLI is in scope:**
+- Arguments, flags, output format, exit codes?
+- `--help` complete and accurate?
+- Piping/composability — output usable as input to next command?
+- Idempotency, `--dry-run`, logging verbosity flags?
+- Error messages actionable (tell user what to do)?
+
+**If Library only:**
+- Public API ergonomics — naming, return shapes, error types?
+- Pagination patterns (iterators vs. cursors vs. callback)?
+- Sync vs. async clearly delineated?
+
+**If no interface declared:** skip Bucket 4.
+
+### Bucket 5: Wire-up
+
+Handled in Phase 5 (Interface ↔ Core Cross-Reference). No critique here — the cross-reference table IS the critique.
+
+### Bucket 6: Operational
+
+- **NFR specificity** — performance targets numeric and measurable? Accessibility requirements concrete (WCAG level)? Security posture (authn, authz, data classification, encryption at rest/transit)?
+- **Observability** — logs (what events, what fields), metrics (what counters/histograms, what dimensions), traces (what spans, what attributes)?
+- **Rollout** — feature flags for risky paths? Migration order documented? Rollback plan concrete? Graceful degradation when downstream is unavailable?
+- **Architecture diagram** — external dependencies named with their versions/SLAs? Data flow directions clear? Ownership boundaries match team boundaries?
+
+### Extensibility clause
+
+Scan the spec for any artifact types not covered above (CLI definitions, cron schedules, IaC resources, ML training loops, message broker topics, etc.). For each, apply the same "is this right, or just present?" critique using the patterns from the buckets above as a starting point.
+
+---
 
 ## Phase 5: Interface ↔ Core Cross-Reference
 
-Stub — to be filled in T4.
+Required when the spec has an interface in scope. Skip if Scope Declaration set "no interface" (pure service / library-only).
+
+**Interface-type → table format:**
+
+| Interface in scope | Cross-reference table |
+|--------------------|----------------------|
+| Frontend (UI) | UI interaction ↔ API endpoint |
+| CLI | CLI command ↔ API/function |
+| External service / webhook | Caller ↔ endpoint |
+| Library-only | Public function ↔ internal logic |
+| None declared | Skip Phase 5 |
+
+**Standard column set:**
+
+| # | Interaction | Trigger | Endpoint/Function | Req Shape Match | Res Has What Consumer Needs | Error Mapping Defined | Notes |
+|---|-------------|---------|-------------------|-----------------|----------------------------|----------------------|-------|
+| W1 | Click "Apply promo" | `<PromoInput>` component | POST /orders/{id}/promo | ✓ | ✗ missing `discount_breakdown` | partial — no "expired" UI msg | Wire-up gap W1 (significant) |
+| W2 | Submit checkout | `<CheckoutForm>` | POST /orders | ✓ | ✓ | ✓ | clean |
+
+**Reverse scan** (do this AFTER the forward table):
+- Every endpoint defined in the spec's API section → does it have a consumer in the interface (or is it explicitly flagged as internal/admin/cron-only)?
+- Every mutating action in the interface → does it map to a defined endpoint?
+
+**Orphans become gaps:**
+- Endpoint with no consumer → either gap (forgotten consumer) or doc gap (missing "internal" tag)
+- Interface action with no endpoint → blocker gap
+
+Append all wire-up findings to the Gap Register with `W` prefix (W1, W2, ...) to distinguish from scenario gaps (S-prefix) and fitness gaps (B-prefix for bucket).
+
+If a companion spec was provided in Scope Declaration (Phase 1), read it now and complete the cross-reference against it (e.g., backend-spec defines POST /orders; frontend-spec calls it from `<CheckoutForm>` — verify the contract holds across the seam).
 
 ## Phase 6: Targeted Pseudocode
 

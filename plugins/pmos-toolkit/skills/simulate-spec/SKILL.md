@@ -92,7 +92,54 @@ Hold scope state in memory; it gets written into Phase 8's simulation doc Sectio
 
 ## Phase 2: Scenario Enumeration
 
-Stub — to be filled in T3.
+Generate the full scenario list in four passes, then confirm with the user before tracing. The point of simulation is to find gaps the spec MISSED — trusting only the spec's stated scenarios defeats the purpose.
+
+### 2a. Extract from spec
+Each User Journey and each Edge Case in the spec becomes a numbered scenario (S1, S2, ...). Keep the spec's wording where possible.
+
+### 2b. Generate missing happy-path variants
+Look for variants the spec didn't enumerate:
+- Different personas (first-time user, power user, admin, support agent)
+- Different entry points (deep link, mobile, API direct, CLI)
+- Different starting states (empty data, near-quota, post-error recovery)
+
+Add each as a new numbered scenario.
+
+### 2c. Adversarial checklist
+For each of these 10 categories, name 1-3 concrete scenarios where applicable to this spec. SKIP categories that don't apply — but state which you skipped and why.
+
+1. **Service/dependency down** — what if a downstream service is unreachable mid-flow?
+2. **Concurrent writes** — same resource by same user; same resource by two users; rapid retries
+3. **Partial failures** — step N of M fails; some side effects committed, others not
+4. **Retries & idempotency** — retry fires after the original eventually succeeded; double-submit
+5. **Stale data / cache invalidation** — user sees old data; cache TTL boundary; stale read after write
+6. **Permission/auth edge cases** — token expires mid-flow; role downgraded mid-flow; cross-tenant access attempt
+7. **Data size / pagination limits** — empty result; result at boundary (page size − 1, page size, page size + 1); 10x expected size
+8. **Network partition / timeout** — request sent but response lost; long-running operation timeout
+9. **Ordering** — out-of-order event delivery; late-arriving data; clock skew between services
+10. **Empty / null / malformed inputs** — required field missing; whitespace-only; UTF-8 edge characters; max-length boundary
+
+### 2d. Model-driven pass
+Read the spec critically — what could break that's specific to THIS design and not captured above? Name 3-5 design-specific failure modes. Examples of the shape of question to ask:
+- "What if the deduplication window is shorter than the retry window?"
+- "What if the spec's batch-size assumption breaks at scale?"
+- "What if two flows that share a state column get into a race?"
+
+### Consolidated scenario list
+
+Present the full list as a table:
+
+| # | Scenario | Source | Category |
+|---|----------|--------|----------|
+| S1 | Customer places order with valid promo | Spec §5.2 | happy |
+| S14 | Two customers apply last-remaining promo simultaneously | Adversarial | concurrency |
+| S22 | Webhook retry fires after the original succeeded | Adversarial | retry |
+| S27 | Promo expires while order is still in cart (5+ min) | Model-driven | timing |
+
+**Source values:** `Spec §X.Y`, `Variant`, `Adversarial`, `Model-driven`.
+**Category values:** `happy`, `edge`, `concurrency`, `failure`, `retry`, `timing`, `auth`, `boundary`, `ordering`, `input` (or other category names that fit).
+
+**Gate:** Present consolidated scenario list. Ask "Here are N scenarios. Any missing? Any to remove?" Wait for user confirmation (or stated assumption per Platform Adaptation) before Phase 3.
 
 ## Phase 3: Scenario Trace
 

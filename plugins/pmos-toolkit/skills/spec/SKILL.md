@@ -10,8 +10,8 @@ argument-hint: "<path-to-requirements-doc or requirements text>"
 Create a comprehensive technical specification from a requirements document. The spec defines HOW we're building it — architecture, API contracts, database design, frontend components, and verification strategy. This is the SECOND stage in a 3-stage pipeline:
 
 ```
-/requirements  →  [/msf, /creativity]  →  /spec  →  /plan  →  /execute  →  /verify
-                   optional enhancers     (this skill)
+/requirements  →  [/msf, /creativity]  →  /spec  →  [/simulate-spec]  →  /plan  →  /execute  →  /verify
+                   optional enhancers     (this skill)    optional validator
 ```
 
 A spec is prescriptive about WHAT and WHY, but leaves room for engineering judgment on internal implementation details. It should be detailed enough that a competent engineer with subject expertise could implement it from the doc alone.
@@ -515,7 +515,11 @@ git add {docs_path}/specs/<file>
 git commit -m "docs: add spec for <feature>"
 ```
 
-Ask the user: "I believe the spec is ready. Do you have any remaining concerns, or shall we move to `/plan`?" — the user's confirmation is required before declaring completion.
+Ask the user: "I believe the spec is ready. Do you have any remaining concerns? Next options:
+- `/pmos-toolkit:simulate-spec` — pressure-test the design against scenarios and adversarial failure modes before planning (recommended for Tier 2-3)
+- `/pmos-toolkit:plan` — proceed directly to implementation planning"
+
+The user's confirmation is required before declaring completion.
 
 ---
 

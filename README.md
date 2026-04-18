@@ -31,6 +31,7 @@ pmos-toolkit/
 | `/pmos-toolkit:creativity` | Structured creativity techniques for non-obvious improvements (optional enhancer) |
 | `/pmos-toolkit:msf` | Motivation, Satisfaction, Friction analysis with PSYCH scoring (optional enhancer) |
 | `/pmos-toolkit:spec` | Technical specification from requirements — second pipeline stage |
+| `/pmos-toolkit:simulate-spec` | Pressure-test a spec via scenario trace, artifact fitness critique, interface cross-reference, and targeted pseudocode (optional validator between /spec and /plan) |
 | `/pmos-toolkit:plan` | Execution plan from a spec — third pipeline stage |
 | `/pmos-toolkit:execute` | Implement a plan end-to-end with TDD and verification |
 | `/pmos-toolkit:verify` | Post-implementation verification gate — lint, test, review, QA |
@@ -41,8 +42,8 @@ pmos-toolkit/
 
 **Pipeline flow:**
 ```
-/requirements  →  [/msf, /creativity]  →  /spec  →  /plan  →  /execute  →  /verify
-                   optional enhancers
+/requirements  →  [/msf, /creativity]  →  /spec  →  [/simulate-spec]  →  /plan  →  /execute  →  /verify
+                   optional enhancers              optional validator
 ```
 
 ## Install

@@ -34,10 +34,6 @@ This skill has multiple phases. Create one task per phase using your agent's tas
 
 Read `~/.pmos/learnings.md` if it exists. Note any entries under `## /simulate-spec` and factor them into your approach for this session.
 
-## Locate Spec
-
-Follow `../.shared/resolve-input.md` with `phase=specs`, `label="spec"`. Read the resolved file end-to-end before Phase 1.
-
 ---
 
 ## Phase 0: Load Workstream Context
@@ -71,7 +67,9 @@ The tier is declared in the spec header (e.g., `**Tier:** 2`). If absent, infer 
 
 ### 1.5 Scope Declaration
 
-Auto-detect the layers present in the spec by scanning section headers (DB Schema, API Contracts, Frontend Design, CLI, Events, Infrastructure, etc.). Combine with the spec's Non-Goals section. Then ask the user via AskUserQuestion:
+**First, propose** by auto-detecting layers from the spec's section headers (DB Schema, API Contracts, Frontend Design, CLI, Events, Infrastructure, etc.) and combining with the Non-Goals section. State your proposal in writing.
+
+**Then confirm** by asking the user via AskUserQuestion to validate or expand:
 
 > "Scope check:
 > - **In this spec:** [auto-detected layers]

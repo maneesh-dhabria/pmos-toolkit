@@ -65,6 +65,23 @@ Additionally, when writing skill instructions:
 - **Escalation policy** — when to stop and ask for help vs. proceeding with stated assumptions
 - **Evidence standards** — what constitutes proof that a step succeeded (command output, not "should work")
 
+### Review loops MUST present findings via `AskUserQuestion`
+
+Any skill that includes a self-review or refinement loop (requirements, spec, plan, simulate-spec, etc. all do) **must not dump findings as prose and wait for a free-form reply**. Prose dumps force the user to hand-write dispositions for each finding and lose structure.
+
+Instead, every review loop in a new skill must include a "Findings Presentation Protocol" section that specifies:
+
+1. **Group findings by category** (max 4 per batch — respects the `AskUserQuestion` 4-question limit).
+2. **One question per finding** via `AskUserQuestion`:
+   - `question`: one-sentence finding + proposed fix (concrete, not vague)
+   - `options`: **Fix as proposed** / **Modify** / **Skip** / **Defer** (adapt names to domain — e.g., simulate-spec uses "Apply patch / Modify patch / Accept as risk / Defer as open question")
+3. **Batch up to 4 questions per call**; issue multiple sequential calls for more findings.
+4. **Open-ended findings** (those needing numeric values, free-form text, or trade-off discussion) should be asked inline as a follow-up after the structured batch — never shoehorn into options.
+5. **Platform fallback** for environments without `AskUserQuestion`: present a numbered findings table with a disposition column; do NOT silently self-fix.
+6. **Anti-pattern to call out explicitly:** "A wall of prose ending in 'Let me know what you'd like to fix.' Always structure the ask."
+
+See the `requirements`, `spec`, `plan`, and `simulate-spec` skills for reference implementations of this protocol.
+
 ---
 
 ## Convention 3: Description Quality
@@ -175,6 +192,7 @@ Before writing the final SKILL.md, verify:
 - [ ] No hard dependency on MCP tools (noted as manual step if unavailable)
 - [ ] Pipeline diagram included if the skill fits the pipeline
 - [ ] Under 500 lines (extract to `reference/` files if needed)
+- [ ] If the skill has review/refinement loops: each loop has a "Findings Presentation Protocol" that uses `AskUserQuestion` with Fix / Modify / Skip / Defer options (or domain equivalents), batched ≤4 per call, with a prose-fallback path
 - [ ] Anti-patterns section present
 - [ ] Learning read at startup (Phase 0 or standalone Load Learnings section)
 - [ ] Capture Learnings is a **numbered phase** (not a trailing unnumbered section) with terminal-gate language ("this skill is not complete until learnings are captured")

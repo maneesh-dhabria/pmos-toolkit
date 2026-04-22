@@ -373,10 +373,30 @@ Each loop runs BOTH checks:
    | Loop | Findings | Changes Made |
    |------|----------|-------------|
    ```
-3. **Present findings to the user BEFORE making changes** — share what you found, what you plan to fix, and ask if the user sees additional gaps. Do NOT silently self-fix and move on. The review loop is a collaborative checkpoint, not a self-assessment.
-4. Use AskUserQuestion if findings need user input
+3. **Present findings via `AskUserQuestion` — do NOT dump them as prose and wait for a free-form reply.** Findings shown as text force the user to hand-write dispositions; batching them as structured questions is faster, clearer, and produces a reviewable audit trail. See "Findings Presentation Protocol" below.
+4. Apply the user's dispositions (Fix as proposed / Modify / Skip / Defer) — see protocol below
 5. Fix issues inline — do NOT create a new file
 6. Commit: `git commit -m "docs: requirements review loop N for <feature>"`
+
+### Findings Presentation Protocol
+
+For every loop that produces findings (structural or product-critique):
+
+1. **Group findings by category** (e.g., "Missing journeys", "Unstated rationale", "Ambiguous language"). Small categories can be merged; never present more than 4 findings in a single batch.
+2. **One question per finding** via `AskUserQuestion`. Use this shape:
+   - `question`: one-sentence restatement of the finding + the proposed fix (concrete, not "tighten section 3")
+   - `options` (up to 4):
+     - **Fix as proposed** — agent applies the stated change
+     - **Modify** — user edits the proposal (free-form reply expected next turn)
+     - **Skip** — not an issue; drop it (note briefly in Review Log)
+     - **Defer** — log in Open Questions with rationale
+3. **Batch up to 4 questions per `AskUserQuestion` call.** If there are more findings, issue multiple calls sequentially, one category per call.
+4. **Skip `AskUserQuestion` only for findings that need open-ended input** (e.g., "what's the right retention window?"). For those, ask inline as a normal follow-up after the batch — do not shoehorn into options.
+5. **After dispositions arrive,** apply them in order, update the Review Log row to cite dispositions, then ask the user if they see additional gaps before declaring the loop complete.
+
+**Platform fallback (no `AskUserQuestion`):** list findings as a numbered table with columns [Finding | Proposed Fix | Options: Fix/Modify/Skip/Defer]; ask the user to reply with the disposition numbers. Do NOT silently self-fix.
+
+**Anti-pattern:** A wall of prose ending in "Let me know what you'd like to fix." This forces the user to re-state each finding in their reply. Always structure the ask.
 
 ### Exit Criteria (ALL must be true)
 
@@ -398,7 +418,7 @@ Run one final improvement pass:
 3. **Coherence** — Any conflicting requirement statements?
 4. **New-person test** — Can someone new to the team understand what we're trying to achieve with no blind spots?
 
-**Share your analysis with the user BEFORE modifying anything.** Ask for confirmation on what needs to be fixed. Do NOT declare the requirements complete until the user confirms.
+**Share your analysis with the user BEFORE modifying anything.** Use the same `AskUserQuestion` batching as review loops (see Phase 5 Findings Presentation Protocol) — one question per final-review finding with Fix / Modify / Skip / Defer options, up to 4 per call. Do NOT declare the requirements complete until the user confirms.
 
 After final fixes, commit:
 ```

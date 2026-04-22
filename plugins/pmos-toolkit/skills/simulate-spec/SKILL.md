@@ -341,8 +341,12 @@ For each gap:
 
 ### Tier-based interaction
 
-- **Tier 2:** present gaps one at a time. Each is small enough that inline review fits the rhythm.
-- **Tier 3:** batch gaps by category (Data, Interfaces, Behavior, Interface, Wire-up, Operational). Present all gaps in a category, get dispositions, then move to the next category. Avoids exhausting the user with one-by-one across potentially dozens of findings.
+**Always present gaps via `AskUserQuestion`, never as a prose dump.** One question per gap, options = the four dispositions above (Apply patch / Modify patch / Accept as risk / Defer as open question). The `question` field should restate the gap + the proposed patch in one sentence so the user can decide without scrolling back.
+
+- **Tier 2:** issue one `AskUserQuestion` call per gap (or small batches of ≤4 related gaps). Each gap is small enough that inline review fits the rhythm.
+- **Tier 3:** batch gaps by category (Data, Interfaces, Behavior, Wire-up, Operational). Present up to 4 gaps per `AskUserQuestion` call, issue multiple calls sequentially within a category, get dispositions, then move to the next category. Avoids exhausting the user with one-by-one across potentially dozens of findings.
+
+**Platform fallback (no `AskUserQuestion`):** present a numbered gap table with a disposition column; ask the user to reply with the selections. Do NOT silently apply patches.
 
 ### Spec edits
 
@@ -397,7 +401,7 @@ Run a SINGLE review pass over the simulation doc. The skill is already adversari
 
 ### If issues found
 
-Append findings to the Gap Register. Return to Phase 7 for resolution. Then re-write the simulation doc (or Edit it surgically). Log the loop in §11 (Review Log).
+Append findings to the Gap Register. Return to Phase 7 for resolution — which means presenting each new gap via `AskUserQuestion` with the four dispositions (Apply patch / Modify / Accept as risk / Defer), batched up to 4 per call by category. Do NOT narrate the findings as prose and wait for a free-form reply. Then re-write the simulation doc (or Edit it surgically). Log the loop in §11 (Review Log).
 
 ### Exit criteria
 

@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Post-implementation verification gate — ALWAYS run after /execute completes. Lint, test, deploy, spec compliance, multi-agent code review, manual QA, and regression test hardening. Also run after manual coding or partial work. Works with git commits, no PR required. Use when the user says "check my work", "is this done", "verify the implementation", "did I miss anything", or "review and test everything".
+description: Post-implementation verification gate — ALWAYS run after /execute completes. Lint, test, deploy, spec compliance, multi-agent code review, interactive QA, and regression test hardening. Also run after manual coding or partial work. Works with git commits, no PR required. Use when the user says "check my work", "is this done", "verify the implementation", "did I miss anything", or "review and test everything".
 user-invocable: true
 argument-hint: "<path-to-spec-doc> (optional — will search {docs_path}/specs/ if omitted)"
 ---
@@ -18,7 +18,7 @@ This is an **operational workflow** — a structured sequence of verification st
 These instructions use Claude Code tool names. In other environments:
 - **No `AskUserQuestion`:** State your assumption, document it in the output, and proceed. The user reviews after completion.
 - **No subagents:** Perform research and analysis sequentially as a single agent.
-- **No Playwright MCP:** Note browser-based verification as a manual step for the user.
+- **No Playwright MCP:** State the specific blocker and the setup the user must complete before browser-based verification can run. Do NOT mark any UI-surface FR verified without either Playwright evidence or an explicitly declared alternative (a specific test file that covers the rendered output). Offloading verification to the user is not a valid completion state — it resolves to `Unverified — action required` on the Phase 5 compliance tables, and Phase 4 stays open.
 - **Task tracking:** Use your available task tracking tool (e.g., `TaskCreate`/`TaskUpdate` in Claude Code, `update_plan` in Codex, or equivalent). If none is available, announce phase transitions verbally.
 
 **Create verification tasks** at the start using your available task tracking tool:
@@ -194,7 +194,7 @@ For every affected UI flow:
 5. **Take screenshots** for evidence
 6. **Verify** that UI matches spec's frontend design section
 
-### 3e. Manual Spot Checks
+### 3e. Interactive Spot Checks
 
 Run actual scenarios in the development environment. Interact with the system as a user would. Specifically:
 
@@ -203,7 +203,7 @@ Run actual scenarios in the development environment. Interact with the system as
 - Test empty states if applicable
 - Verify that unrelated flows still work (no regressions)
 
-**Do NOT rely only on automated tests.** Manual verification catches issues that tests miss (rendering glitches, confusing UX, wrong copy, timing issues).
+**Do NOT rely only on automated tests.** Interactive verification (Playwright MCP driving real user journeys) catches issues that tests miss: rendering glitches, confusing UX, wrong copy, timing issues. "Interactive" means you operate the browser via MCP — not that a human operates it for you.
 
 ---
 
@@ -226,7 +226,7 @@ Read `{docs_path}/specs/<file>`. For every FR-ID and edge case:
 
 | ID | Requirement | Status | Evidence |
 |----|-------------|--------|----------|
-| FR-01 | [From spec] | Pass/Fail | [Test name or manual verification] |
+| FR-01 | [From spec] | Pass/Fail | [Test name or interactive verification artifact] |
 | FR-02 | ... | ... | ... |
 | E1 | [Edge case] | Pass/Fail | [How verified] |
 
@@ -325,7 +325,7 @@ Every claim must have evidence. No exceptions:
 | "Lint is clean" | Paste the actual output: no errors |
 | "API returns correct shape" | Show the actual curl output |
 | "UI renders correctly" | Screenshot via Playwright MCP |
-| "Spec requirement met" | Point to specific test or manual verification |
+| "Spec requirement met" | Point to specific test or interactive verification artifact |
 | "No regressions" | Show full test suite output |
 
 **Never use:** "should pass", "looks correct", "probably fine", "I believe"

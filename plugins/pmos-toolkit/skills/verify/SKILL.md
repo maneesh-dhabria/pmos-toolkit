@@ -155,6 +155,39 @@ For each issue scoring 75+:
 
 ## Phase 4: Deploy & Integration Verification
 
+### Phase 4 Entry Gate — Enumerate the Verification Surface
+
+Before running any Phase 4 sub-step, enumerate every upstream requirement that has a runtime surface and create one `TodoWrite` task per item. This list is the gate — Phase 4 is not complete until every todo is closed with evidence or explicitly resolved to `Unverified — action required` with a named blocker. A plain bullet list in prose does not substitute for `TodoWrite` todos; the todos are the structural enforcement.
+
+**How to build the list:**
+
+1. Read the spec's FR-IDs and edge cases. For each, classify the runtime surface:
+   - **UI surface** (user sees, clicks, enters something) → todo required
+   - **API surface** (new or modified endpoint) → todo required
+   - **Data surface** (migration, schema change, background job output) → todo required
+   - **Pure internal logic** (algorithm verified by unit test only) → NOT on the list; cite the test in Phase 5 compliance instead
+2. Read the requirements doc's user journeys. Every end-to-end journey with UI or API touchpoints gets one todo.
+3. For each enumerated item, create a `TodoWrite` task formatted as:
+   `Verify <FR-ID or Journey-ID>: <one-line description> [evidence: <type from table below>]`
+
+**Evidence-type allowlist by sub-step:**
+
+| Sub-step | Acceptable evidence |
+|----------|--------------------|
+| 3a. Database Migrations | Migration command output + DB schema query confirming the new shape |
+| 3b. Docker Deployment | Service health check output + startup log snippet showing no errors |
+| 3c. API Smoke Tests | `curl` response body compared row-by-row to the spec's API contract |
+| 3d. Frontend Verification | Playwright MCP screenshot, `browser_evaluate` DOM assertion, or a specific test file covering the rendered output |
+| 3e. Interactive Spot Checks | Playwright MCP interaction trace covering a user journey end-to-end, including at least one error/edge path |
+
+**Every enumerated todo resolves to exactly one of three outcomes:**
+
+1. **Verified** — evidence produced and cited. The evidence type must match the allowlist row for the sub-step. Close the todo.
+2. **NA — alternative evidence cited** — the runtime surface doesn't exist for this item (e.g., FR is a pure calculation change). Cite the alternative (e.g., `test_pricing.py::test_discount_applied`) or the specific reason tied to the FR text. Bare "NA" is not valid. Close the todo with the alternative recorded.
+3. **Unverified — action required** — you attempted verification and were blocked. State the specific blocker and the user action needed (e.g., "user must run `make seed-dev-db` before 3e can proceed"). Leave the todo OPEN and surface it in the Phase 8 final report.
+
+**Setup is part of Phase 4, not a prerequisite.** Starting the dev server, seeding the DB, running migrations, authenticating — all Phase 4 work. If setup is complex, write down the exact commands, execute them, and proceed. Only escalate to the user when a genuine decision is required (e.g., "which dev DB to use"), not to offload execution. "Setup would take too long" is a Phase 4 red flag, not a reason.
+
 ### 3a. Database Migrations (if applicable)
 
 ```bash

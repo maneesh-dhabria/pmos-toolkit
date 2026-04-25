@@ -356,3 +356,35 @@ For `monthly` cadence: today = 2026-02-15. Advance to 2026-03-15.
 For `daily`: today = 2026-04-25 → next 2026-04-26.
 For `biweekly`: today = 2026-04-25 → next 2026-05-09.
 For `none`: leave next_checkin blank.
+
+## Fixture: with-archive
+
+Four items: 0010 (recent done, 5 days), 0011 (old done, 69 days, Q1), 0012 (old dropped, 64 days, Q1), 0013 (active).
+
+### Scenario: `/mytasks archive` (today = 2026-04-25, no --quarter flag)
+
+Expected:
+- Eligible: status in (completed, dropped) AND today - updated > 30 days.
+- 0010: completed, 5 days → NOT eligible.
+- 0011: completed, 69 days → eligible. Target = year-of-updated 2026, quarter-of-updated Q1 → `2026-Q1`.
+- 0012: dropped, 64 days → eligible. Target = `2026-Q1`.
+- 0013: in-progress → NOT eligible.
+- Move 0011 to `~/.pmos/tasks/archive/2026-Q1/0011-old-done-task.md`.
+- Move 0012 to `~/.pmos/tasks/archive/2026-Q1/0012-old-dropped-task.md`.
+- Apply Phase 12 (INDEX unchanged since archived items were already excluded).
+- Output: `Archived 2 items: #0011 → 2026-Q1, #0012 → 2026-Q1.`
+
+### Scenario: `/mytasks archive --quarter 2026-Q2` (today = 2026-04-25)
+
+Expected:
+- Same eligibility check.
+- BUT target overridden to `2026-Q2` for both eligible items (--quarter override).
+- Move 0011 and 0012 to `~/.pmos/tasks/archive/2026-Q2/`.
+- Output: `Archived 2 items: #0011 → 2026-Q2, #0012 → 2026-Q2.`
+
+### Scenario: `/mytasks archive` (today = 2026-04-25, with-tasks fixture which has zero eligible items)
+
+Expected:
+- 0001 (in-progress), 0002 (pending), 0003 (waiting), 0004 (pending) — all active, none eligible.
+- No moves.
+- Output: `Archived 0 items: nothing eligible.`

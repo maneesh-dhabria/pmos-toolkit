@@ -567,4 +567,32 @@ Checked in on #{id}. Status: waiting → in-progress. Next checkin: {next_checki
 
 ---
 
-(Phase 11 is added in the next task.)
+## Phase 11: Archive
+
+Triggered by `/mytasks archive [--quarter Q]`.
+
+### Step 1: Determine target quarter
+
+If `--quarter <Q>` is provided (format `YYYY-QN`, validated via regex `^[0-9]{4}-Q[1-4]$`), use it for the destination directory for ALL eligible items.
+
+Otherwise, derive per-item: target = `{year-of-updated}-Q{quarter-of-updated}` based on the item's `updated:` date. Quarter math: month 1-3 → Q1, 4-6 → Q2, 7-9 → Q3, 10-12 → Q4.
+
+### Step 2: Collect eligible items
+
+For each file in `~/.pmos/tasks/items/*.md`:
+- Parse frontmatter.
+- Eligible if `status` in (`completed`, `dropped`) AND age (today - `updated:`) > 30 days.
+
+### Step 3: Move
+
+For each eligible item:
+- Create `~/.pmos/tasks/archive/{quarter}/` if absent (`mkdir -p`).
+- Move `~/.pmos/tasks/items/{file}` → `~/.pmos/tasks/archive/{quarter}/{file}` (use `mv`; if `~/.pmos/` is a git repo, prefer `git mv` to preserve history).
+
+### Step 4: Regenerate INDEX, report
+
+Apply Phase 12 (archive items are already excluded from INDEX, so this is mostly a no-op refresh — but ensures `Last regenerated:` is updated).
+
+Output:
+- If N > 0: `Archived {N} items: {comma-separated list of "#{id} → {quarter}"}.`
+- If N = 0: `Archived 0 items: nothing eligible.`

@@ -57,6 +57,28 @@ If the first token is not a recognized verb AND the argument is non-empty, treat
 
 ---
 
+## Phase 1: Show Local INDEX
+
+Triggered by `/backlog` with no arguments.
+
+### Step 1: Resolve `backlog/`
+
+If `<repo>/backlog/INDEX.md` does not exist (or `<repo>/backlog/` is missing entirely), output:
+
+`No backlog yet. Capture an item with /backlog add <text>.`
+
+Then exit.
+
+### Step 2: Validate freshness
+
+Compare `backlog/INDEX.md`'s "Last regenerated:" date against `git log -1 --format=%cI -- backlog/items/`. If items have been modified more recently than INDEX, regenerate (apply Phase 10) before rendering.
+
+### Step 3: Render
+
+Output the contents of `backlog/INDEX.md` to the user.
+
+---
+
 ## Phase 2: Quick-Capture (`add` or bare text)
 
 Triggered by `/backlog add <text>` OR `/backlog <any free text>` (no recognized verb).
@@ -123,3 +145,88 @@ Output exactly one line:
 If `type` was the fallback (`idea` from rule 4 of `inference-heuristics.md`), append:
 
 ` — type inferred as 'idea' (no strong signal); use /backlog set {id} type=... to correct.`
+
+---
+
+## Phase 3: Filtered List
+
+Triggered by `/backlog list [flags]`.
+
+Recognized flags (all optional, all combinable; AND semantics):
+
+| Flag | Effect |
+|---|---|
+| `--type <feature\|bug\|tech-debt\|idea>` | Filter by type |
+| `--status <inbox\|ready\|spec'd\|planned\|in-progress\|done\|wontfix>` | Filter by status |
+| `--priority <must\|should\|could\|maybe>` | Filter by priority |
+| `--label <name>` | Item must include this label |
+| `--repo <name>` | (Workstream mode only) restrict to one linked repo |
+| `--workstream` | Aggregate across all repos linked to the active workstream |
+| `--include-archive` | Include items in `backlog/archive/**/` |
+
+### Step 1: Resolve scope
+
+- Without `--workstream`: read items from `<repo>/backlog/items/` (and `archive/**/` if `--include-archive`).
+- With `--workstream`: apply the workstream aggregator from Phase 11.
+
+### Step 2: Validate flag values against enums
+
+Reject unknown flag values with the allowed list. Example: `Unknown status 'open'. Allowed: inbox, ready, spec'd, planned, in-progress, done, wontfix.`
+
+### Step 3: Apply filters and sort
+
+Sort: priority bucket (must > should > could > maybe) → score desc (nulls last) → updated desc.
+
+### Step 4: Render
+
+Render a markdown table identical in shape to a single section of `INDEX.md`, but with no priority grouping (sorted flat list). Columns: `id | type | status | priority | title | spec | plan | pr`. In `--workstream` mode, prepend a `repo` column.
+
+If zero matches: `No items match.`
+
+---
+
+## Phase 4: Show Item
+
+Triggered by `/backlog show <id>`.
+
+### Step 1: Normalize id
+
+Accept `42`, `0042`, or `repo-name#0042` (workstream form). For local form, zero-pad to 4 digits.
+
+### Step 2: Locate the file
+
+Search `<repo>/backlog/items/{id}-*.md`. If not found, search `<repo>/backlog/archive/**/{id}-*.md`.
+
+### Step 3: Handle missing
+
+If still not found:
+
+1. Find existing items whose id starts with the same digit prefix.
+2. Output: `No item with id {id}. Closest matches by prefix: {list or "(none)"}. Run /backlog list to see all items.`
+
+### Step 4: Render
+
+Output the file contents verbatim, fenced as markdown.
+
+---
+
+## Phase 10: Rebuild Index
+
+Triggered by `/backlog rebuild-index`. Also invoked internally by Phases 2, 5, 6, 7, 8, 9 after any item write.
+
+### Step 1: Read items
+
+Glob `<repo>/backlog/items/*.md`. For each, parse frontmatter. Skip files with malformed frontmatter (emit one-line warning per skip; do not abort).
+
+### Step 2: Group and sort
+
+Group by `priority`. Within each group, sort by `score` desc (nulls last), then `updated` desc.
+
+### Step 3: Write `INDEX.md`
+
+Overwrite `<repo>/backlog/INDEX.md` with the format defined in `schema.md` (### INDEX.md format section). Include `Last regenerated: {today}` after the title.
+
+### Step 4: Report
+
+If invoked directly: `Regenerated INDEX.md: {count} items.`
+If invoked from another phase: silent on success, warn on failure.

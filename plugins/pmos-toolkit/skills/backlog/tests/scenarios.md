@@ -37,3 +37,27 @@ Expected:
 Expected:
 - id `0003`, `type: idea` (no keyword match → fallback), `status: inbox`.
 - Output includes the inference fallback notice: `Captured #0003 (idea, should): "something completely vague" — type inferred as 'idea' (no strong signal); use /backlog set 0003 type=... to correct.`
+
+### Scenario: `/backlog` (no args, with-items fixture)
+
+Expected: render `INDEX.md` content (or regenerate then render). Output groups items by priority bucket, must-first.
+
+### Scenario: `/backlog list --status inbox`
+
+Expected: list only items with `status: inbox`. With the `with-items` fixture, only `#0003` matches.
+
+### Scenario: `/backlog list --type feature`
+
+Expected: only `#0002`.
+
+### Scenario: `/backlog show 2`
+
+Expected: render the full content of `backlog/items/0002-add-rate-limit-to-api.md` verbatim.
+
+### Scenario: `/backlog show 999`
+
+Expected: error `No item with id 0999. Closest matches by prefix: (none). Run /backlog list to see all items.`
+
+### Scenario: `/backlog rebuild-index` after a manual edit
+
+Expected: read all files in `items/`, regenerate `INDEX.md`, report `Regenerated INDEX.md: 3 items.`

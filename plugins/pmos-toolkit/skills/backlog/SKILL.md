@@ -210,6 +210,94 @@ Output the file contents verbatim, fenced as markdown.
 
 ---
 
+## Phase 5: Refine
+
+Triggered by `/backlog refine <id>`. Interactive — use `AskUserQuestion` where available; otherwise, present the prompts as a list and collect a single response, parsing each section.
+
+### Step 1: Load the item
+
+Locate via Phase 4's lookup. If not found, error and exit (same message as Phase 4 Step 3).
+
+### Step 2: Collect updates
+
+Ask in this order, ONE field at a time when `AskUserQuestion` is available:
+
+1. **Title** — show current; ask "Edit the title? (enter to keep)"
+2. **Context** — multi-line free text; allow "skip"
+3. **Acceptance criteria** — one per line; "done" to finish; allow zero
+4. **Priority** — multi-choice from the enum; default to current
+5. **Score (optional)** — integer 1-1000 or "skip"
+6. **Labels (optional)** — comma-separated or "skip"
+
+### Step 3: Write body
+
+Build the body from collected values:
+- Always write `## Context` (with content or "_TBD_" placeholder if user skipped — placeholder is fine here because refine is iterative)
+- Always write `## Acceptance Criteria` if any were provided; omit the H2 if empty
+- Omit `## Notes` (refine never collects notes — that's free-form for later edits)
+
+Replace the entire body of the item file with the new sections. Keep frontmatter intact except:
+- `updated:` -> today
+- `status:` -> `ready` if currently `inbox`; otherwise unchanged
+- `priority:`, `score:`, `labels:` if changed
+
+### Step 4: Regenerate INDEX, report
+
+Apply Phase 10. Output: `Refined #{id}. Status: {old_status} -> {new_status}.` (omit the arrow if status unchanged).
+
+---
+
+## Phase 6: Set Field
+
+Triggered by `/backlog set <id> <field>=<value>`.
+
+### Step 1: Parse and validate field name
+
+Allowed fields: `title`, `type`, `status`, `priority`, `score`, `labels`, `parent`, `dependencies`, `source`, `spec_doc`, `plan_doc`, `pr`.
+
+Disallowed (skill-managed only): `id`, `created`, `updated`. Reject with: `Field '{field}' cannot be set directly. The skill manages it.`
+
+### Step 2: Validate value
+
+| Field | Validation |
+|---|---|
+| `type` | Must be in `feature, bug, tech-debt, idea` |
+| `status` | Must be in `inbox, ready, spec'd, planned, in-progress, done, wontfix` |
+| `priority` | Must be in `must, should, could, maybe` |
+| `score` | Integer, 1 <= n <= 1000, or empty (to clear) |
+| `labels` | Comma-separated; written as a YAML list |
+| `dependencies` | Comma-separated ids; validate each exists in `items/` (warn on missing, but proceed) |
+| `parent` | Single id; validate exists |
+| `title`, `source`, `spec_doc`, `plan_doc`, `pr` | Free string |
+
+On enum violation: `Unknown {field} '{value}'. Allowed: {comma-separated list}.` No write.
+
+### Step 3: Edit and report
+
+Load item, update only the named field, set `updated:` to today, write back. If `title` changed, ALSO rename the file to match the new slug (preserve id prefix). Apply Phase 10. Output: `Updated #{id}: {field} = {value}.` (or `... renamed to {new-filename}.` if a rename occurred).
+
+---
+
+## Phase 8: Link Doc or PR
+
+Triggered by `/backlog link <id> <doc-path-or-url>`.
+
+### Step 1: Infer target field
+
+| Pattern | Target field |
+|---|---|
+| URL matching `https?://github\.com/[^/]+/[^/]+/pull/\d+` | `pr` |
+| Path ending in `-spec.md` or matching `*-{anything}-spec.md` | `spec_doc` |
+| Path ending in `-plan.md` | `plan_doc` |
+| Path ending in `-requirements.md` or under `requirements/` | `source` (treated as originating doc) |
+| Anything else | error: `Cannot infer link type from '{value}'. Use /backlog set {id} <field>=<value>.` |
+
+### Step 2: Apply
+
+Delegate to Phase 6 (set) with the inferred `field=value`. Output: `Linked #{id}: {field} = {value}.`
+
+---
+
 ## Phase 10: Rebuild Index
 
 Triggered by `/backlog rebuild-index`. Also invoked internally by Phases 2, 5, 6, 7, 8, 9 after any item write.

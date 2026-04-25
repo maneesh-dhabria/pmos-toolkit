@@ -61,3 +61,36 @@ Expected: error `No item with id 0999. Closest matches by prefix: (none). Run /b
 ### Scenario: `/backlog rebuild-index` after a manual edit
 
 Expected: read all files in `items/`, regenerate `INDEX.md`, report `Regenerated INDEX.md: 3 items.`
+
+### Scenario: `/backlog refine 3` (with-items fixture)
+
+Expected: interactive flow (uses AskUserQuestion if available):
+1. Show current title and ask if anything needs editing.
+2. Ask for `## Context` content (multi-line; "skip" allowed).
+3. Ask for acceptance criteria as a list (one per line; "done" to finish).
+4. Confirm `priority` (default the current value).
+5. Optionally collect `score` (skippable).
+6. Optionally collect `labels` (comma-separated, skippable).
+7. Write the body sections to the item file. Update `status: ready` if currently `inbox`. Update `updated:` to today.
+8. Regenerate INDEX.md.
+9. Output: `Refined #0003. Status: inbox -> ready.`
+
+### Scenario: `/backlog set 3 priority=must`
+
+Expected: validate `must` against the priority enum, edit only that field, update `updated:` to today, regenerate INDEX.md, output `Updated #0003: priority = must.`
+
+### Scenario: `/backlog set 3 status=invalid-status`
+
+Expected: error `Unknown status 'invalid-status'. Allowed: inbox, ready, spec'd, planned, in-progress, done, wontfix.` No file write.
+
+### Scenario: `/backlog set 3 score=820`
+
+Expected: write `score: 820` (creating the field if absent). Validate 1 <= score <= 1000.
+
+### Scenario: `/backlog link 2 docs/.pmos/2026-04-22-rate-limit-spec.md`
+
+Expected: infer field from filename pattern: `*-spec.md` -> `spec_doc`, `*-plan.md` -> `plan_doc`, anything matching `https://github.com/*/pull/*` -> `pr`. For this case, set `spec_doc:` to the path. Output: `Linked #0002: spec_doc = docs/.pmos/2026-04-22-rate-limit-spec.md.`
+
+### Scenario: `/backlog link 2 https://github.com/foo/bar/pull/99`
+
+Expected: set `pr:` to the URL. Output: `Linked #0002: pr = https://github.com/foo/bar/pull/99.`

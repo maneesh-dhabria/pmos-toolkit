@@ -101,4 +101,47 @@ If invoked from another phase: silent on success, warn on failure.
 
 ---
 
-(Phases 2, 3, 4, 5, 6, 7 are added in subsequent tasks.)
+## Phase 2: Fuzzy-Match Find
+
+Triggered by `/people find <text>`. Read-only lookup. Used by `/mytasks` capture and by users directly.
+
+Algorithm and tier definitions: see `lookup.md`.
+
+### Step 1: Resolve and read
+
+If `~/.pmos/people/` does not exist or contains no records, output: `No people in directory. Add one with /people add <name>.` Exit.
+
+Otherwise, glob `~/.pmos/people/*.md` (excluding `INDEX.md`). Parse frontmatter for each. Skip malformed files with a one-line warning.
+
+### Step 2: Match in priority order
+
+Apply the 5-tier match algorithm from `lookup.md`. Stop at the first tier that produces matches; do not collect from lower tiers if a higher tier hit.
+
+For each record, evaluate match tiers in order:
+1. Exact handle (case-insensitive on `handle:`).
+2. Exact alias (case-insensitive on any entry in `aliases:`).
+3. Exact name (case-insensitive on `name:`).
+4. Substring on handle / name / aliases.
+5. Initials of `name:` (only if input length ≤ 3 AND input is all letters).
+
+Within the matching tier, sort by `updated:` desc; break ties alphabetically by handle.
+
+### Step 3: Render
+
+- **0 matches:** `No matches for '{input}'.`
+- **1 match:** `1 match: {handle} ({name}){match-note}.`
+  - `{match-note}` is empty for tier 1, ` — matched alias '{alias}'` for tier 2, omitted for tier 3, ` — substring match` for tier 4, ` — initials match` for tier 5.
+- **N matches:**
+  ```
+  {N} matches:
+    {handle} ({name}){match-note}
+    ...
+  ```
+
+### Step 4: Caller integration
+
+When `find` is invoked programmatically by `/mytasks` (not a user-typed command), the caller reads the rendered output and parses out handles. The output format above is contract — do not change without updating callers.
+
+---
+
+(Phases 3, 4, 5, 6, 7 are added in subsequent tasks.)

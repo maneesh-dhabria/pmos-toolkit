@@ -144,4 +144,74 @@ When `find` is invoked programmatically by `/mytasks` (not a user-typed command)
 
 ---
 
-(Phases 3, 4, 5, 6, 7 are added in subsequent tasks.)
+## Phase 3: Proactive Create (`add`)
+
+Triggered by `/people add <name>`. Interactive — collects rich attributes upfront.
+
+### Step 1: Derive handle
+
+Apply the handle derivation rules from `lookup.md` against the provided `<name>`:
+1. Tokenize on whitespace, lowercase, drop pure-punctuation tokens.
+2. Single-token name: try `<firstname>`, then `<firstname>-2`, etc.
+3. Multi-token name: try `<firstname>-<lastinitial>`, then `<firstname>-<lastname>`, then `<firstname>-<lastname>-N`.
+
+A "collision" means a file with that handle already exists at `~/.pmos/people/{handle}.md`.
+
+### Step 2: Collect attributes via `_shared/interactive-prompts.md`
+
+Ask in this order, ONE field at a time per the shared protocol:
+
+1. **`designation`** — free string. Prompt: `Designation? (formal title, e.g., 'VP Engineering')`. Skippable.
+2. **`role`** — free string. Prompt: `Role? (informal day-to-day, e.g., 'Eng Manager')`. Skippable.
+3. **`working_relationship`** — enum. Prompt: `Working relationship?` Options: `boss`, `direct-report`, `peer`, `team-member`, `stakeholder`, `external`, `other`. Skippable (no default).
+4. **`team`** — free string. Prompt: `Team?`. Skippable.
+5. **`email`** — free string. Prompt: `Email?`. Skippable.
+6. **`workstreams`** — comma-separated list. Prompt: `Workstreams? (comma-separated slugs from ~/.pmos/workstreams/)`. Skippable.
+7. **`aliases`** — comma-separated list. Prompt: `Aliases? (comma-separated short forms for fuzzy match)`. Skippable.
+
+### Step 3: Write the record file
+
+Path: `~/.pmos/people/{handle}.md`.
+
+Frontmatter (skipped fields are written as bare keys with no value, e.g., `email:` not absent):
+
+```yaml
+---
+handle: {derived-handle}
+name: {original name argument}
+designation: {value or empty}
+role: {value or empty}
+working_relationship: {value or empty}
+team: {value or empty}
+email: {value or empty}
+workstreams: [{values}]   # written as YAML list, even if single item; empty list as []
+aliases: [{values}]
+created: {today}
+updated: {today}
+---
+```
+
+No body section is auto-written. The user can add `## Notes` later via direct file edit or via `/people refine`.
+
+### Step 4: Regenerate INDEX
+
+Apply Phase 8 (rebuild-index) inline. If regeneration fails, the record file is still written — emit a warning suggesting `/people rebuild-index`, but DO NOT roll back the record write.
+
+### Step 5: Report
+
+Output: `Added {handle} ({name}).`
+
+### Reactive create entry point (called by `/mytasks`, not user-invoked)
+
+When `/mytasks` rich-capture hits an unknown person and the user picks "(a) create new person 'X'", `/mytasks` invokes a minimal create variant of this phase that:
+- Skips Step 2 (no prompts).
+- Sets `name:` to the disambiguated name.
+- Sets `aliases:` to `[<original-token>]` (e.g., `[sarah]` if the user wrote `@sarah`).
+- All other fields absent.
+- Returns the derived handle to the caller.
+
+This entry point has no user-facing slash command — `/mytasks` invokes it directly via shared instruction reference.
+
+---
+
+(Phases 4, 5, 6, 7 are added in subsequent tasks.)

@@ -91,3 +91,35 @@ Expected (initials match for Sarah Patel, priority 5; input length 2, all letter
 
 Expected (no match):
 - Render: `No matches for 'xyz'.`
+
+## Fixture: empty-people (continued)
+
+### Scenario: `/people add Sarah Chen` (empty fixture, no collisions)
+
+Expected interactive flow (uses AskUserQuestion if available, else fallback per `_shared/interactive-prompts.md`):
+1. Derive handle: `sarah-c` (single-token last name initial; no collision because empty fixture).
+2. Prompt for `designation` (free string, skippable). User responds: `VP Engineering`.
+3. Prompt for `role` (free string, skippable). User: `Eng Manager`.
+4. Prompt for `working_relationship` (enum choice). User picks: `peer`.
+5. Prompt for `team` (free string, skippable). User: `platform`.
+6. Prompt for `email` (free string, skippable). User: `sarah@acme.com`.
+7. Prompt for `workstreams` (comma-separated list, skippable). User: `platform-q3`.
+8. Prompt for `aliases` (comma-separated list, skippable). User: `sarah, schen, sc`.
+9. Write `~/.pmos/people/sarah-c.md` with all collected fields, `created`/`updated` = today.
+10. Apply Phase 8 (regenerate INDEX.md).
+11. Output: `Added sarah-c (Sarah Chen).`
+
+### Scenario: `/people add Sarah Chen` (with-people fixture, sarah-c.md does NOT exist; sarah-chen.md DOES exist)
+
+Expected:
+- Derive handle: try `sarah-c` — not taken, use it. Write `~/.pmos/people/sarah-c.md`.
+- All other steps as above.
+- Output: `Added sarah-c (Sarah Chen).`
+
+(This is a deliberate test of derivation collision handling: even though "sarah-chen" already exists as a different person's handle, the new "Sarah Chen" gets `sarah-c` because that's the first-tier derivation. The lookup algorithm distinguishes them by exact handle / aliases.)
+
+### Scenario: `/people add Sarah` (with-people fixture, single-token name)
+
+Expected:
+- Derive handle: try `sarah` — not taken (no fixture record uses bare `sarah`), use it.
+- Output: `Added sarah (Sarah).`

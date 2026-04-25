@@ -373,4 +373,101 @@ The output is identical to the equivalent `list` invocation. No special formatti
 
 ---
 
-(Phases 6, 7, 8, 9, 10, 11 are added in subsequent tasks.)
+## Phase 6: Show Item
+
+Triggered by `/mytasks show <id>`.
+
+### Step 1: Normalize id
+
+Accept `42`, `0042`, or `42` with extra spaces. Zero-pad to 4 digits.
+
+### Step 2: Locate the file
+
+Search `~/.pmos/tasks/items/{id}-*.md`. If not found, search `~/.pmos/tasks/archive/**/{id}-*.md`.
+
+### Step 3: Handle missing
+
+If still not found:
+1. Find existing items whose id starts with the same digit prefix.
+2. Output: `No item with id {id}. Closest matches by prefix: {comma-separated list or "(none)"}. Run /mytasks list to see all items.`
+
+### Step 4: Render
+
+Output the file contents verbatim, fenced as markdown.
+
+---
+
+## Phase 7: Set Field
+
+Triggered by `/mytasks set <id> <field>=<value>`.
+
+### Step 1: Locate the item
+
+Use Phase 6 normalize-and-locate. If not found, error and exit (same message).
+
+### Step 2: Parse and validate field name
+
+Allowed editable fields: `title`, `type`, `importance`, `status`, `workstream`, `people`, `labels`, `links`, `due`, `start`, `checkin`, `next_checkin`, `completed`.
+
+Disallowed (skill-managed): `id`, `created`, `updated`. Reject: `Field '{field}' cannot be set directly. The skill manages it.`
+
+Unknown fields: `Field '{field}' is not recognized. Allowed: {comma-separated list}.`
+
+### Step 3: Validate value
+
+| Field | Validation |
+|---|---|
+| `type` | Must be in `execution, follow-up, reminder, idea, read, call` |
+| `importance` | Must be in `leverage, neutral, overhead` |
+| `status` | Must be in `pending, in-progress, waiting, completed, dropped` |
+| `checkin` | Must be in `daily, weekly, biweekly, monthly, none` |
+| `due`, `start`, `next_checkin`, `completed` | ISO date `YYYY-MM-DD`, OR natural-language date parsed per `inference-heuristics.md`, OR empty (to clear) |
+| `people`, `labels`, `links` | Comma-separated; written as YAML list |
+| `title`, `workstream` | Free string |
+
+For `people`: each token is treated as a literal handle (NOT fuzzy-matched). The user is responsible for typing exact handles when using `set`.
+
+On enum violation: `Unknown {field} '{value}'. Allowed: {comma-separated list}.` No write.
+
+### Step 4: Edit and report
+
+Load item, update only the named field, set `updated:` to today, write back. If `title` changed, ALSO rename the file to match the new slug (preserve id prefix; recompute slug per Phase 2 Step 4 rules). Apply Phase 12. Output:
+
+- For non-title changes: `Updated #{id}: {field} = {value}.`
+- For title changes: `Updated #{id}: title = {value}. Renamed to {new-filename}.`
+
+---
+
+## Phase 8: Refine
+
+Triggered by `/mytasks refine <id>`. Interactive — pre-filled walk through all editable fields.
+
+### Step 1: Locate the item
+
+Use Phase 6 normalize-and-locate. If not found, error and exit.
+
+### Step 2: Walk through fields per `_shared/interactive-prompts.md`
+
+Same field order as Phase 3, but with title added as the first prompt and each field pre-filled with its current value:
+
+1. **`title`** — free string. Default = current title.
+2. **`importance`** — enum. Default = current.
+3. **`type`** — enum. Default = current.
+4. **`workstream`** — free string. Default = current.
+5. **`due`** — date input. Default = current.
+6. **`people`** — comma-separated. Default = current. For each token, run `/people find`; on multi-match or no-match, present the same three-option flow as Phase 3 Step 2.
+7. **`checkin`** — enum. Default = current. If user picks a non-`none` cadence, also prompt for whether to recompute `next_checkin: today + cadence` (default yes; only useful if the cadence is changing).
+
+`<enter>` keeps current; explicit value replaces; `clear` (for list fields) empties.
+
+### Step 3: Write back
+
+Replace each field with the new value (only if changed). If `title` changed, rename the file (same logic as Phase 7 Step 4). Set `updated:` to today.
+
+### Step 4: Regenerate INDEX, report
+
+Apply Phase 12. Output: `Refined #{id}.` (Or `Refined #{id}. Renamed to {new-filename}.` if title changed.)
+
+---
+
+(Phases 9, 10, 11 are added in subsequent tasks.)

@@ -236,3 +236,62 @@ Expected:
 - Validate against status enum. `open` is not in the list.
 - Output: `Unknown status 'open'. Allowed: pending, in-progress, waiting, completed, dropped.`
 - No render.
+
+### Scenario: `/mytasks show 1` (with-tasks fixture)
+
+Expected:
+- Normalize id `1` → `0001`.
+- Locate `~/.pmos/tasks/items/0001-*.md`.
+- Render the file content verbatim, fenced as markdown.
+
+### Scenario: `/mytasks show 999` (with-tasks fixture)
+
+Expected:
+- Search items/, search archive/. Not found.
+- Find existing items whose id starts with the same digit prefix (`9` → none in fixture).
+- Output: `No item with id 0999. Closest matches by prefix: (none). Run /mytasks list to see all items.`
+
+### Scenario: `/mytasks set 2 importance=leverage` (with-tasks fixture)
+
+Expected:
+- Validate `leverage` against importance enum. Pass.
+- Load 0002 file, update `importance: leverage`, set `updated:` to today, write back.
+- Apply Phase 12.
+- Output: `Updated #0002: importance = leverage.`
+
+### Scenario: `/mytasks set 2 status=invalid_status`
+
+Expected:
+- Validate against status enum. Fail.
+- Output: `Unknown status 'invalid_status'. Allowed: pending, in-progress, waiting, completed, dropped.`
+- No write.
+
+### Scenario: `/mytasks set 2 id=99`
+
+Expected:
+- `id` is skill-managed.
+- Output: `Field 'id' cannot be set directly. The skill manages it.`
+- No write.
+
+### Scenario: `/mytasks set 2 title="Call sarah on Q3 roadmap"`
+
+Expected:
+- Edit `title:`.
+- ALSO rename file: `0002-call-sarah-on-roadmap.md` → `0002-call-sarah-on-q3-roadmap.md` (preserve id prefix; recompute slug from new title).
+- Set `updated:` to today.
+- Apply Phase 12.
+- Output: `Updated #0002: title = Call sarah on Q3 roadmap. Renamed to 0002-call-sarah-on-q3-roadmap.md.`
+
+### Scenario: `/mytasks refine 1` (with-tasks fixture)
+
+Expected interactive flow per `_shared/interactive-prompts.md`, same field order as Phase 3 plus a leading title prompt, pre-filled:
+1. Prompt title (current: `Draft Q3 OKRs for Platform team`). User: `<enter>`.
+2. Prompt importance (current: `leverage`). User: `<enter>`.
+3. Prompt type (current: `execution`). User: `<enter>`.
+4. Prompt workstream (current: `platform-q3`). User: `<enter>`.
+5. Prompt due (current: `2026-05-12`). User: `2026-05-15`. Skill parses date.
+6. Prompt people (current: `sarah-chen`). User: `sarah-chen, mark-davis`. Skill resolves both via /people find.
+7. Prompt checkin (current: empty/none). User: `weekly`. Skill auto-sets `next_checkin: today + 7 days`.
+8. Write back, set `updated:` to today.
+9. Apply Phase 12.
+10. Output: `Refined #0001.`

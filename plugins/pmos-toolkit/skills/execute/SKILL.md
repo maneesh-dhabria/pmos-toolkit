@@ -45,7 +45,7 @@ Before any other work, follow the context loading instructions in `product-conte
 
 ## Phase 1: Setup
 
-1. **Locate the plan.** Follow `../.shared/resolve-input.md` with `phase=plans`, `label="plan"`.
+1. **Locate the plan.** Follow `../.shared/resolve-input.md` with `phase=plan`, `label="plan"`.
 2. **Read the plan and its upstream spec end-to-end.** Understand the "Done when" criteria and final verification task.
 3. **Isolate the work:**
    - **Worktree (preferred):** Check for existing `.worktrees/` or `worktrees/` directory. If neither exists, create `.worktrees/`. Verify the directory is gitignored (`git check-ignore -q .worktrees`); if not, add it to `.gitignore` and commit. Then:

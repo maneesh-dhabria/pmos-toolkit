@@ -47,7 +47,7 @@ Before any other work, follow the context loading instructions in `product-conte
 ## Phase 1: Intake, Tier Detection & Scope Declaration
 
 ### 1.1 Locate the spec
-Follow `../.shared/resolve-input.md` with `phase=specs`, `label="spec"`. Echo the resolved path before proceeding.
+Follow `../.shared/resolve-input.md` with `phase=spec`, `label="spec"`. Echo the resolved path before proceeding.
 
 ### 1.2 Read the spec end-to-end
 Read the full file. Summarize back to the user in 3-5 bullets covering: problem, primary goals, tier, decisions already made. Confirm understanding via AskUserQuestion (or state assumption per Platform Adaptation if AskUserQuestion is unavailable).

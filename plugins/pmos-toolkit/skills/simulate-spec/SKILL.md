@@ -2,7 +2,7 @@
 name: simulate-spec
 description: Pressure-test a spec against realistic and adversarial scenarios before implementation — scenario trace, artifact fitness critique, interface cross-reference, targeted pseudocode. Optional validator between /spec and /plan in the requirements -> spec -> plan pipeline. Use when the user says "simulate the design", "validate this spec", "will this design actually work", "check for gaps in the design", or has a spec ready for end-to-end scrutiny before implementation.
 user-invocable: true
-argument-hint: "<path-to-spec-doc> [--force]"
+argument-hint: "<path-to-spec-doc> [--feature <slug>] [--force]"
 ---
 
 # Spec Simulation Generator
@@ -40,18 +40,20 @@ Read `~/.pmos/learnings.md` if it exists. Note any entries under `## /simulate-s
 
 Before any other work, follow the context loading instructions in `product-context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context to inform critique — product constraints and tech-stack decisions shape what counts as a gap. Also note any entries under `## /simulate-spec` in `~/.pmos/learnings.md` and factor them into your approach for this session.
 
+**Resolve feature folder.** Follow `../_shared/feature-folder.md` with `skill_name=simulate-spec`, `feature_arg=<--feature value or empty>`, and `feature_hint=<spec slug or topic>`. Use the returned folder path as `{feature_folder}`. This skill consumes `02_spec.md` (via resolve-input.md) and writes traces under `{feature_folder}/simulate-spec/`.
+
 ---
 
 ## Phase 1: Intake, Tier Detection & Scope Declaration
 
 ### 1.1 Locate the spec
-Follow `../.shared/resolve-input.md` with `phase=specs`, `label="spec"`. Echo the resolved path before proceeding.
+Follow `../.shared/resolve-input.md` with `phase=spec`, `label="spec"`. Echo the resolved path before proceeding.
 
 ### 1.2 Read the spec end-to-end
 Read the full file. Summarize back to the user in 3-5 bullets covering: problem, primary goals, tier, decisions already made. Confirm understanding via AskUserQuestion (or state assumption per Platform Adaptation if AskUserQuestion is unavailable).
 
 ### 1.3 Check for existing simulation
-Look in `{docs_path}/simulations/` for an existing file covering this feature.
+Look in `{feature_folder}/simulate-spec/` for an existing trace file covering this feature.
 - **If found:** ask "Is this an update to the existing simulation, or a fresh start?" Update mode re-traces only against changed spec sections; fresh start re-runs all phases.
 - **If not found:** proceed.
 
@@ -360,7 +362,7 @@ Every "Accept as risk" or "Defer as open question" MUST capture rationale. "I do
 
 ## Phase 8: Write Simulation Doc
 
-Save to `{docs_path}/simulations/YYYY-MM-DD-<feature>-simulation.md`. Create the `simulations/` directory if it doesn't exist.
+Save trace files to `{feature_folder}/simulate-spec/{YYYY-MM-DD}-trace.md`. Create the `simulate-spec/` directory if it doesn't exist. If a file with the same date already exists, append `-2`, `-3`, etc. for subsequent runs the same day.
 
 Populate the doc from accumulated state:
 - §1 (Scope) ← from Phase 1
@@ -381,7 +383,7 @@ Read the full template at `reference/simulation-doc-template.md` (relative to th
 
 After writing, commit:
 ```
-git add {docs_path}/simulations/<file>
+git add {feature_folder}/simulate-spec/<file>
 git commit -m "docs: simulation for <feature>"
 ```
 

@@ -2,7 +2,7 @@
 name: execute
 description: Execute an implementation plan end-to-end — task-by-task TDD implementation with deploy verification, frontend testing, and manual spot checks. Supports git worktree isolation. Use when the user says "implement the plan", "start building", "execute this", "code this up", or has a plan doc ready for implementation.
 user-invocable: true
-argument-hint: "<path-to-plan-doc> [--backlog <id>]"
+argument-hint: "<path-to-plan-doc> [--feature <slug>] [--backlog <id>]"
 ---
 
 # Plan Executor
@@ -39,11 +39,13 @@ This skill optionally integrates with `/backlog`. See `plugins/pmos-toolkit/skil
 
 Before any other work, follow the context loading instructions in `product-context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context passively — it informs implementation decisions and deviation assessments. Also read `~/.pmos/learnings.md` if it exists. Note any entries under `## /execute` and factor them into your approach for this session.
 
+**Resolve feature folder.** Follow `../_shared/feature-folder.md` with `skill_name=execute`, `feature_arg=<--feature value or empty>`, and `feature_hint=<topic if provided>`. Use the returned folder path as `{feature_folder}`. This skill consumes `03_plan.md` (via resolve-input.md) and writes per-task logs under `{feature_folder}/execute/`.
+
 ---
 
 ## Phase 1: Setup
 
-1. **Locate the plan.** Follow `../.shared/resolve-input.md` with `phase=plans`, `label="plan"`.
+1. **Locate the plan.** Follow `../.shared/resolve-input.md` with `phase=plan`, `label="plan"`.
 2. **Read the plan and its upstream spec end-to-end.** Understand the "Done when" criteria and final verification task.
 3. **Isolate the work:**
    - **Worktree (preferred):** Check for existing `.worktrees/` or `worktrees/` directory. If neither exists, create `.worktrees/`. Verify the directory is gitignored (`git check-ignore -q .worktrees`); if not, add it to `.gitignore` and commit. Then:
@@ -83,8 +85,9 @@ Work through the plan's tasks in order. For each task:
    - **UI tasks:** open the affected page in Playwright MCP (or fallback). Paste screenshot or programmatic output.
    - If you cannot produce runtime evidence for an API or UI task, the task is not done. Do not commit.
 6. **Commit** — small, focused commit per task. Not one giant commit at the end.
-7. **Mark task as completed** in your task tracker.
-8. **Move to next task** — only after verification passes, evidence is produced, and task is marked complete.
+7. **Write per-task log** to `{feature_folder}/execute/task-{NN}.md` where `NN` matches the task number from the plan (zero-padded 2 digits, e.g. `task-01.md`, `task-12.md`). Capture: task name/number, files touched, key decisions, deviations, runtime evidence, and verification outcome. Overwrite if a re-run hits the same task.
+8. **Mark task as completed** in your task tracker.
+9. **Move to next task** — only after verification passes, evidence is produced, and task is marked complete.
 
 ### Verify-Fix Loop (per task)
 

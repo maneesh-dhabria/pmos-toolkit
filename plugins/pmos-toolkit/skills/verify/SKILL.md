@@ -2,7 +2,7 @@
 name: verify
 description: Post-implementation verification gate — ALWAYS run after /execute completes. Lint, test, deploy, spec compliance, multi-agent code review, interactive QA, and regression test hardening. Also run after manual coding or partial work. Works with git commits, no PR required. Use when the user says "check my work", "is this done", "verify the implementation", "did I miss anything", or "review and test everything".
 user-invocable: true
-argument-hint: "<path-to-spec-doc> (optional — will search {docs_path}/specs/ if omitted) [--backlog <id>]"
+argument-hint: "<path-to-spec-doc> (optional — will search {docs_path}/specs/ if omitted) [--feature <slug>] [--backlog <id>]"
 ---
 
 # Implementation Verification Gate
@@ -65,14 +65,16 @@ Mark each as in-progress when starting and completed when done. Skip tasks that 
 
 Before any other work, follow the context loading instructions in `product-context/context-loading.md` (relative to the skills directory). This determines `{docs_path}` and loads workstream context if available. Use workstream context to verify that implementation aligns with product goals, not just spec compliance. Also read `~/.pmos/learnings.md` if it exists. Note any entries under `## /verify` and factor them into your approach for this session.
 
+**Resolve feature folder.** Follow `../_shared/feature-folder.md` with `skill_name=verify`, `feature_arg=<--feature value or empty>`, and `feature_hint=<topic if provided>`. Use the returned folder path as `{feature_folder}`. This skill reads all prior artifacts (`01_requirements.md`, `02_spec.md`, `03_plan.md`, `execute/`) and writes review reports under `{feature_folder}/verify/`.
+
 ---
 
 ## Phase 1: Gather Context
 
 1. **Locate upstream documents.** Resolve each of the three inputs by following `../.shared/resolve-input.md`:
-   - Spec: `phase=specs`, `label="spec"` (user argument, if passed, applies to the spec)
+   - Spec: `phase=spec`, `label="spec"` (user argument, if passed, applies to the spec)
    - Requirements: `phase=requirements`, `label="requirements doc"`
-   - Plan: `phase=plans`, `label="plan"`
+   - Plan: `phase=plan`, `label="plan"`
 2. **Read all three documents** (whichever exist). You need these for the compliance check.
 3. **Identify what changed.** Run `git diff main...HEAD --stat` (or appropriate base) to see which files were modified. This scopes the verification.
 4. **Check if lint/type/tests were already run.** Ask the user or check recent terminal history. Skip steps already completed — but re-run if you're not confident they were clean.
@@ -286,7 +288,7 @@ Every row also cross-references the todo it closed (or left open) from the Phase
 
 ### 4a. Requirements Compliance
 
-Read `{docs_path}/requirements/<file>`. For every goal, user journey, and acceptance criterion:
+Read `{feature_folder}/01_requirements.md` (resolved in Phase 1). For every goal, user journey, and acceptance criterion:
 
 | # | Requirement | Outcome | Evidence |
 |---|-------------|---------|----------|
@@ -295,7 +297,7 @@ Read `{docs_path}/requirements/<file>`. For every goal, user journey, and accept
 
 ### 4b. Spec Compliance
 
-Read `{docs_path}/specs/<file>`. For every FR-ID and edge case:
+Read `{feature_folder}/02_spec.md` (resolved in Phase 1). For every FR-ID and edge case:
 
 | ID | Requirement | Outcome | Evidence |
 |----|-------------|---------|----------|
@@ -305,7 +307,7 @@ Read `{docs_path}/specs/<file>`. For every FR-ID and edge case:
 
 ### 4c. Plan Compliance
 
-Read `{docs_path}/plans/<file>`. For every task:
+Read `{feature_folder}/03_plan.md` (resolved in Phase 1). For every task:
 
 | Task | Outcome | Evidence |
 |------|---------|----------|
@@ -367,7 +369,9 @@ One last check before committing:
    ```
    If there are multiple logical changes, use multiple commits.
 
-2. **Report to the user:**
+2. **Write the review report** to `{feature_folder}/verify/{YYYY-MM-DD}-review.md`. If a report with that name already exists from an earlier run today, append `-2`, `-3`, etc. (e.g., `2026-04-30-review-2.md`). The report contains the same content delivered to the user in step 3.
+
+3. **Report to the user:**
    - Verification summary (which phases passed/failed)
    - Compliance tables (requirements, spec FR-IDs, plan tasks)
    - Gaps found and how they were resolved

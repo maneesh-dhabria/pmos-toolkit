@@ -2,7 +2,7 @@
 name: backlog
 description: Maintain a lightweight, AI-readable backlog of features, bugs, tech-debt, and ideas inside the repo. Zero-friction quick-capture (`/backlog add ...`) plus structured tracking with status, priority, and acceptance criteria. Integrates with the requirements -> spec -> plan -> execute -> verify pipeline via explicit `--backlog <id>` linkage. Use when the user says "add to backlog", "capture this idea", "track this bug", "show the backlog", "promote a backlog item", or "what's in the backlog".
 user-invocable: true
-argument-hint: "[<text> | add <text> | list [filters] | show <id> | refine <id> | set <id> <field>=<value> | promote <id> | link <id> <doc> | archive | rebuild-index]"
+argument-hint: "[<text> | add <text> | list [filters] | show <id> | refine <id> | set <id> <field>=<value> | promote <id> [--feature <slug>] | link <id> <doc> | archive | rebuild-index]"
 ---
 
 # Backlog
@@ -281,7 +281,7 @@ Load item, update only the named field, set `updated:` to today, write back. If 
 
 ## Phase 7: Promote
 
-Triggered by `/backlog promote <id>`. Hands off the item to the appropriate pipeline skill.
+Triggered by `/backlog promote <id> [--feature <slug>]`. Seeds a feature folder from the backlog item and hands off to the appropriate pipeline skill.
 
 ### Step 1: Load and check status
 
@@ -311,15 +311,23 @@ Title: {title}
 Source: backlog/items/{id}-{slug}.md
 ```
 
-### Step 3: Invoke the target skill
+### Step 3: Resolve feature folder
 
-Invoke the target skill (`/requirements` or `/spec`) with the seed AND `--backlog {id}` so the pipeline-bridge consent gate opens. The user's session continues inside the target skill.
+Follow `../_shared/feature-folder.md` with `skill_name=backlog`, `feature_arg=<--feature value or empty>`, and `feature_hint=<title of the backlog item being promoted>`. The protocol typically creates a new folder for the promoted item (default to **Create new** with the derived slug). Use the returned `{feature_folder}` for the output path. The protocol also updates `.pmos/current-feature` so subsequent pipeline skills pick up the same folder.
 
-### Step 4: On return, report
+### Step 4: Seed the feature folder
 
-Once the target skill exits, output: `Promoted #{id} -> {target}. (source linked)` if the target wrote a doc, or `Promoted #{id} -> {target}. (target did not write a doc — re-invoke when ready.)` otherwise.
+Write the seed (from Step 2) to `{feature_folder}/01_requirements.md`. If that file already exists in the resolved folder, do NOT overwrite — instead, abort with: `#{id}: {feature_folder}/01_requirements.md already exists. Re-run with --feature <new-slug> or remove the existing file.`
 
-The actual frontmatter update on the item (e.g., `source:` or `spec_doc:`) is the target skill's responsibility per `pipeline-bridge.md`. Phase 7 does NOT mutate item frontmatter — it only invokes.
+### Step 5: Invoke the target skill
+
+Invoke the target skill (`/requirements` or `/spec`) with `--backlog {id}` so the pipeline-bridge consent gate opens. The target skill resolves its input from the current feature folder per `_shared/feature-folder.md` + `.shared/resolve-input.md` (so the seeded `01_requirements.md` is picked up automatically). The user's session continues inside the target skill.
+
+### Step 6: On return, report
+
+Once the target skill exits, output: `Promoted #{id} -> {target}. Seeded {feature_folder}/01_requirements.md.` Append `(source linked)` if the target wrote a downstream doc, or `(target did not write a doc — re-invoke when ready.)` otherwise.
+
+The actual frontmatter update on the item (e.g., `source:` or `spec_doc:`) is the target skill's responsibility per `pipeline-bridge.md`. Phase 7 does NOT mutate item frontmatter — it only seeds the feature folder and invokes.
 
 ---
 

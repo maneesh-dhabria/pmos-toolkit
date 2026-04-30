@@ -1,2 +1,5 @@
 .DS_Store
 .worktrees/
+
+# pmos-toolkit per-repo session pointer
+.pmos/current-feature

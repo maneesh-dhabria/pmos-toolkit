@@ -68,7 +68,7 @@ The user's input can take several forms. Handle each differently:
 
 1. **Read the user's input.** If the argument is unclear about which product/service/surface the requirements concern, use AskUserQuestion to clarify upfront — do not guess.
 2. **Scope check.** If the input describes multiple independent subsystems (e.g., "build X with chat, billing, analytics, and admin"), flag this immediately. Don't spend questions refining details of a project that needs decomposition first. Help the user break it into independent sub-requirements, each getting its own requirements doc.
-3. **Check for existing requirements.** Look in `{docs_path}/requirements/` for an existing file covering this feature.
+3. **Check for existing requirements.** Look in `{feature_folder}/01_requirements.md` for an existing file covering this feature.
    - If found: read it, summarize what's there, ask the user if this is an update or fresh start.
    - If not found: proceed.
 4. **Detect the tier** based on the nature of the work:

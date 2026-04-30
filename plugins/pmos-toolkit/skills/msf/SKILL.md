@@ -1,8 +1,8 @@
 ---
 name: msf
-description: Evaluate requirements from an end-user perspective using Motivation, Satisfaction, and Friction analysis with PSYCH scoring. Optional enhancer for Tier 3 requirements — apply before /spec. Use when the user says "evaluate the UX", "will users actually use this", "check for friction", "user experience analysis", or wants to simulate how users will feel about the proposed solution.
+description: Evaluate requirements from an end-user perspective using Motivation, Satisfaction, and Friction analysis with PSYCH scoring. Optional enhancer for Tier 3 requirements — apply before /spec. Also invoked inline from /wireframes Phase 7 with `--wireframes` and `--skip-psych` to apply MSF analysis to generated wireframes. Use when the user says "evaluate the UX", "will users actually use this", "check for friction", "user experience analysis", or wants to simulate how users will feel about the proposed solution.
 user-invocable: true
-argument-hint: "<path-to-requirements-doc>"
+argument-hint: "<path-to-requirements-doc> [--wireframes <folder>] [--skip-psych] [--default-scope=both|requirements|wireframes]"
 ---
 
 # MSF Analysis — Motivation, Satisfaction & Friction
@@ -39,6 +39,23 @@ Follow `../.shared/resolve-input.md` with `phase=requirements`, `label="requirem
 
 ---
 
+## Locate Wireframes (Optional)
+
+If `--wireframes <folder>` was passed (typically when invoked from `/wireframes` Phase 7), resolve and read the folder:
+
+1. Confirm the folder exists and contains `index.html` plus per-component `.html` files.
+2. Read every `.html` file (not just the index) — each one represents a screen or component the user will encounter.
+3. Read `psych-findings.md` if it exists in the same folder — it contains pre-computed PSYCH scoring from `/wireframes` Phase 6 and means Pass B (PSYCH) should be skipped (also gated by `--skip-psych`).
+4. If `--wireframes` was passed but the folder is missing or empty, error out — don't silently fall back to req-doc-only analysis.
+
+If `--wireframes` was NOT passed:
+- Pass A (MSF) runs against the requirements doc only — analysis is necessarily abstract.
+- Pass B (PSYCH) is skipped (per the existing anti-pattern: PSYCH requires wireframes).
+
+**Read the resolved input(s) end-to-end before Phase 1.**
+
+---
+
 ## Phase 1: Identify & Align on Personas
 
 Propose user personas (minimum 2, maximum 5) and typical usage scenarios (maximum 2 per persona — these are usage contexts, not error cases).
@@ -68,6 +85,13 @@ Use subagents to analyze each journey from the approved personas and scenarios. 
 ### Pass A: MSF Analysis
 
 Answer each consideration question (below) for each persona + scenario + journey combination. If a question isn't applicable, say so briefly rather than skipping silently.
+
+**When wireframes are available** (loaded in "Locate Wireframes"), Pass A consumes them as a first-class input alongside the requirements doc. The analysis becomes concrete:
+- Cite specific screens / steps when answering each consideration ("On step 3 (`05_payment_desktop-web.html`), the user is asked for credit card before any value is delivered — kills motivation for the new-user persona.")
+- Reference actual UI elements, copy, and flow ordering rather than abstract claims
+- Ground every M / F / S finding in either a wireframe element or a req-doc claim, not author imagination
+
+**When wireframes are NOT available** (no `--wireframes` flag), Pass A runs against the requirements doc only — analysis is necessarily abstract. State assumptions about flow ordering and surface them in the output for user verification.
 
 #### Motivation Considerations
 - What is the job the user is trying to do?
@@ -101,7 +125,9 @@ Answer each consideration question (below) for each persona + scenario + journey
 
 ### Pass B: PSYCH Scoring
 
-If wireframes are available, walk through each screen following the user's attention path (left-to-right, top-to-bottom). Score notable UI elements as +Psych or -Psych.
+**Skip Pass B entirely if `--skip-psych` was passed** (typical when invoked from `/wireframes` Phase 7, which has already produced `psych-findings.md`). Reference the existing `psych-findings.md` in the report's PSYCH section instead of re-scoring.
+
+If wireframes are available AND `--skip-psych` was not passed, walk through each screen following the user's attention path (left-to-right, top-to-bottom). Score notable UI elements as +Psych or -Psych.
 
 **+Psych (adds motivation):**
 - Positive emotions: attractive visuals, social proof, credibility signals
@@ -135,6 +161,14 @@ If there are multiple flows and screens, analyze each independently using subage
 
 Save consolidated MSF findings and PSYCH scoring tables to `docs/msf/YYYY-MM-DD-<feature-name>-msf-analysis.md`. Commit.
 
+**If `--wireframes <folder>` was passed**, also write a copy of the analysis doc to `<folder>/msf-findings.md` so the wireframes folder is a self-contained handoff artifact for `/spec`. Add a header line at the top of the copy noting the canonical location:
+
+```markdown
+> Canonical copy: `docs/msf/YYYY-MM-DD-<feature-name>-msf-analysis.md`
+```
+
+The canonical doc remains the source of truth — the in-folder copy is for /spec convenience only. If both files need updating later, update the canonical first then re-copy.
+
 ---
 
 ## Phase 4: Prioritize & Agree on Recommendations
@@ -162,7 +196,9 @@ Ask the user whether to update:
 
 Only proceed with what the user approves.
 
-**Wireframe guidance:** Update only `-final.html` wireframes (not iterations). Add visual elements for layout-affecting changes. Copy/label changes can be text annotations only.
+**`--default-scope` flag:** if passed (e.g., `--default-scope=both` from `/wireframes` Phase 7), the AskUserQuestion still presents but recommends the flagged option as the default. The user can still override. If `--default-scope` is not passed, no recommendation — present neutrally.
+
+**Wireframe guidance:** When invoked from `/wireframes`, edit the per-component `.html` files in the wireframes folder directly using `Edit`. The state-switcher tabs and shared `wireframe.css` mean most changes are localized to one file. After each edit, spot-check the file against `../wireframes/reference/eval-rubric.md` — do NOT trigger another /wireframes Phase 4 review-loop. For standalone /msf usage with wireframes, prefer non-iteration files; add visual elements for layout-affecting changes; copy/label changes can be text annotations.
 
 ---
 
@@ -195,5 +231,8 @@ Table-heavy, minimal prose. Keep the report under 300 lines.
 - Do NOT skip the persona alignment step — analyzing without confirmed personas produces generic findings
 - Do NOT pad PSYCH scores — 0 ideas from a consideration is better than a forced insight
 - Do NOT apply PSYCH scoring without wireframes — it requires visual walkthrough
+- Do NOT re-run PSYCH (Pass B) when `--skip-psych` was passed — `/wireframes` already produced `psych-findings.md`; reference it instead
 - Do NOT modify requirements or wireframes without user approval in Phase 5
 - Do NOT present recommendations as a wall of text — use tables with severity and effort
+- Do NOT trigger `/wireframes` Phase 4 review-loops after editing wireframes — spot-check inline against `../wireframes/reference/eval-rubric.md`
+- Do NOT skip the `<wireframes-folder>/msf-findings.md` copy when `--wireframes` was passed — /spec relies on the wireframes folder being self-contained
